@@ -1,0 +1,1485 @@
+/* colors:  #f7eabd, #24211c, #71352b */
+* {
+    margin: 0;
+    padding: 0;
+    /* font-family: "EB Garamond", serif; */
+    font-family: "Cormorant Garamond", serif;
+}
+
+h1 {
+    margin-bottom: 2%;
+}
+
+.hidden {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+#none-display {
+    display: none;
+}
+
+main {
+    padding-left: 10%;
+    padding-right: 10%;
+}
+
+.top-menu {
+    display: block;
+    background-color: #24211C;
+    color: #f6f6f5;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: row;
+    position: fixed;
+    width: 100%;
+    top: 0;
+}
+
+.top-menu {
+    z-index: 20;
+}
+
+.buttom-menu {
+    position: fixed;
+    width: 100%;
+    z-index: 999;
+    transition: top 0.3s ease;
+    margin-top: 135px;
+}
+
+.buttom-menu.hidden {
+    top: -240px;
+}
+
+.media-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 40px;
+}
+
+.media-icon img {
+    width: 2rem;
+}
+
+.logo {
+    text-align: center;
+    left: 2%;
+}
+
+.logo img {
+    width: 9rem;
+    height: auto;
+    padding: 8%;
+    margin-left: 31%;
+}
+
+.contact-menu {
+    display: flex;
+    gap: 5%;
+    flex-direction: row;
+    align-items: center;
+}
+
+.contact-tool img {
+    width: 1rem;
+    height: auto;
+}
+
+.contact-tools {
+    flex-direction: column;
+    align-items: flex-start;
+    width: 10rem;
+    font-size: 18px;
+}
+
+.contact-tool {
+    display: flex;
+    align-items: center;
+    margin: 2%;
+    gap: 2%;
+}
+
+.btn-order {
+    text-align: center;
+    width: 6rem;
+}
+
+.hover-button {
+    width: 140px;
+    border: 2px solid #fff;
+    border-radius: 5px;
+    font-size: 18px;
+    color: #24211C;
+    font-weight: bolder;
+}
+
+.hover-button:hover {
+    background-color: #f7eabd;
+    color: #000000ee;
+    border: 2px solid #000000ee;
+}
+
+.hover-button:active {
+    background-color: #24211C;
+    color: #f6f6f5;
+    border: 2px solid #fff;
+}
+
+.navbar-expand-lg .navbar-collapse {
+    flex-direction: column;
+}
+
+.bg-f7eabd {
+    background-color: #f7eabd;
+    color: #24211C;
+    font-size: 18pt;
+}
+
+.dropdown-item {
+    font-size: 19px;
+}
+
+.dropdown-item:active {
+    background-color: #f6f6f5;
+}
+
+.w-100 {
+    border-radius: 8px;
+}
+
+/* крошка */
+.kroshka a {
+    color: #c0875c;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.kroshka a:hover {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #71352b;
+}
+
+.kroshka-0 {
+    display: flex;
+    margin-left: 10%;
+}
+
+.kroshka-0 a {
+    color: #d4d4d4;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.kroshka-0 a:hover {
+    text-decoration: underline;
+    cursor: pointer;
+    color: #c0875c;
+}
+
+
+
+.offer {
+    background-image: url(../img/offer.webp);
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 820px;
+    padding-top: 150px;
+    object-fit: fill;
+    background-size: cover;
+    color: #f6f6f5;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    color: #24211C;
+}
+
+.carousel {
+    width: 480px;
+    /* Ширина карусели */
+    margin-right: 20px;
+    /* Отступ между каруселью и текстом */
+}
+
+.event-text {
+    max-width: 530px;
+    /* Максимальная ширина текста */
+    text-align: center;
+    font-size: 22px;
+}
+
+.event-text h3 {
+    font-size: 26px;
+}
+
+.carousel-indicators li {
+    height: 10px;
+    width: 10px;
+    border-radius: 10px;
+}
+
+.offer-text {
+    text-align: center;
+    background-color: #24211cb5;
+    padding-bottom: 1%;
+    height: 100%;
+    padding-top: 50px;
+}
+
+.offer-btn {
+    margin-bottom: 2rem;
+    margin-top: 1rem;
+}
+
+.novinki-nedeli {
+    text-align: center;
+}
+
+.buttom-cards {
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+}
+
+.special-event {
+    margin-top: 4%;
+}
+
+.icon-offer p {
+    font-size: 24px;
+}
+
+.offer h2 {
+    padding: 2%;
+}
+
+.btn-custom {
+    background-color: #c0875c;
+    /* Основной цвет */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    /* Цвет текста (темный для контраста) */
+    font-size: 22px;
+    padding-left: 4%;
+    padding-right: 4%;
+}
+
+.btn-custom:hover {
+    background-color: #702f27;
+    /* Цвет при наведении (немного темнее) */
+    border-color: #c0875c;
+    /* Цвет границы при наведении */
+    color: #e0d4a8;
+    /* Цвет текста при наведении */
+}
+
+
+.novinki-nedeli {
+    margin-top: 4%;
+    margin-bottom: 4%;
+}
+
+.main-card {
+    width: 70%;
+}
+
+
+
+
+
+/* Стили для кнопки "Наверх" */
+#scrollToTop {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #71352b;
+    color: #f7eabd;
+    border: none;
+    border-radius: 50%;
+    /* Круглая форма */
+    width: 50px;
+    /* Ширина кнопки */
+    height: 50px;
+    /* Высота кнопки */
+    font-size: 24px;
+    /* Размер стрелочки */
+    cursor: pointer;
+    display: none;
+    /* Скрываем кнопку по умолчанию */
+    transition: background-color 0.3s;
+    text-align: center;
+    /* Центрируем стрелочку */
+    line-height: 50px;
+    /* Центрируем стрелочку по вертикали */
+}
+
+#scrollToTop:hover {
+    background-color: #24211c;
+}
+
+footer {
+    background-color: #24211C;
+    color: #f7eabd;
+    text-align: center;
+    position: absolute;
+    left: 0;
+    right: 0;
+    padding: 1.5%;
+}
+
+footer a {
+    text-decoration: none;
+    color: #aaa;
+    font-weight: bolder;
+}
+
+footer a:hover {
+    color: #fff;
+}
+
+.menu-footer {
+    display: flex;
+    justify-content: space-evenly;
+    font-size: 22px;
+}
+
+.step-menu {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#a-side {
+    font-weight: 300;
+}
+
+.image-links {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 1.5%;
+}
+
+.image-links a {
+    display: inline-block;
+}
+
+.image-links img {
+    width: 2rem;
+    height: auto;
+}
+
+
+.logotip-footer {
+    padding: 2%;
+    padding-top: 0;
+}
+
+.logotip-footer img {
+    width: 8rem;
+}
+
+.kapcha {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    color: #a04d3e;
+}
+
+#years-develop {
+    font-size: 20px;
+}
+
+.icon-offer img {
+    width: 8rem;
+    height: auto;
+}
+
+.icons-for-offer {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+}
+
+
+
+
+
+
+
+
+.button-container {
+    position: relative;
+    /* Устанавливаем относительное позиционирование для контейнера */
+    display: inline-block;
+    /* Позволяет контейнеру занимать место в строке */
+}
+
+
+.owl-tooltip {
+    position: absolute;
+    /* Позиционирование относительно родительского контейнера */
+    left: 100%;
+    /* Появляется справа от кнопки */
+    top: 50%;
+    /* Центрируется по вертикали относительно кнопки */
+    transform: translateY(-50%);
+    /* Центрируем по вертикали */
+    background-color: #ccc;
+    /* Цвет фона для совушки */
+    border: 1px solid #71352b;
+    /* Обводка */
+    border-radius: 5px;
+    padding: 5px;
+    /* Отступы */
+
+    /* Мягкий переход для изменения прозрачности */
+    opacity: 0;
+    /* Изначально скрыта (прозрачная) */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    /* Плавный переход */
+    transform: translateY(-50%) translateX(10px);
+    /* Эффект выезда */
+    visibility: hidden;
+    /* Делает элемент невидимым */
+}
+
+.button-container:hover .owl-tooltip {
+    opacity: 1;
+    /* Совушка становится видимой (прозрачная на 1) */
+    transform: translateY(-50%) translateX(0);
+    /* Возвращаем на место */
+    visibility: visible;
+    /* Делает элемент видимым */
+}
+
+
+
+/* страница меню */
+
+/* Стили для карточек */
+.card {
+    margin: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: scale(1.05);
+}
+
+/* Стили для кастомных стрелочек */
+.carousel-control-prev,
+.carousel-control-next {
+    width: 50px;
+    /* Ширина стрелочек */
+    height: 50px;
+    /* Высота стрелочек */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Фон стрелочек */
+    border-radius: 50%;
+    /* Круглая форма */
+    top: 50%;
+    /* Позиционирование по вертикали */
+    transform: translateY(-50%);
+    /* Центрирование */
+    opacity: 0.8;
+    /* Прозрачность */
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    /* Плавные переходы */
+}
+
+.carousel-control-prev:hover,
+.carousel-control-next:hover {
+    opacity: 1;
+    /* Убираем прозрачность при наведении */
+    background-color: rgba(0, 0, 0, 0.7);
+    /* Темнее фон при наведении */
+}
+
+.carousel-control-prev {
+    left: -25px;
+    /* Позиционирование слева */
+}
+
+.carousel-control-next {
+    right: -25px;
+    /* Позиционирование справа */
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    width: 30px;
+    /* Размер иконки */
+    height: 30px;
+    /* Размер иконки */
+    background-size: 100%;
+    /* Масштабирование иконки */
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    /* Тень для иконки */
+}
+
+
+/* страница доставки */
+
+.about-delivery {
+    text-align: center;
+    margin-bottom: 3.5%;
+    margin-top: 2%;
+}
+
+.info-devivery {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    border: 2px solid #702f271b;
+    border-radius: 5px;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    font-size: 24px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    background-color: #fefffc;
+}
+
+.info-devivery:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.text-delivery img {
+    width: 7rem;
+    height: auto;
+    filter: drop-shadow(0 0 5px #702f2793);
+}
+
+.text-delivery {
+    width: 50%;
+}
+
+.phone-delivery {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 25px;
+
+}
+
+.phone-delivery img {
+    width: 2rem;
+    height: auto;
+    filter: none;
+    cursor: pointer;
+}
+
+.pre-slots {
+    display: flex;
+    justify-content: space-around;
+}
+
+.pre-slot {
+    padding: 2%;
+    border-radius: 10px;
+    font-size: 22px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.pre-slot:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.pre-slot img {
+    border-radius: 3px;
+}
+
+.pre-slot-img {
+    text-align: center;
+}
+
+.predzakaz-span {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 600;
+    margin-top: 1%;
+}
+
+.predzakaz {
+    margin-bottom: 2.5%;
+}
+
+
+
+/* 
+копирование текста */
+.tooltip {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px;
+    background-color: #702f27;
+    color: white;
+    border-radius: 5px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+    font-family: "Cormorant Garamond", serif;
+    font-size: 18px;
+    padding: 1%;
+}
+
+.text-to-copy:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.tooltip.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* страница бронирования*/
+.offer-booking {
+    background-image: url(../img/offer-booking.png);
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    background-size: cover;
+    color: #f6f6f5;
+    padding-top: 200px;
+}
+
+.offer-booking h2 {
+    padding-top: 3%;
+}
+
+.offer-booking img {
+    margin-top: 2rem;
+}
+
+/* Графический интерфейс */
+.room-layout {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background-color: #f0f0f0;
+    border: 2px solid #ccc;
+    margin-bottom: 20px;
+}
+
+.table {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: #8b5e3c;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.chear-1 {
+    position: absolute;
+    top: -60%;
+}
+
+.chear-2 {
+    position: absolute;
+    top: 110%;
+    transform: rotate(180deg);
+}
+
+.chear-3 {
+    position: absolute;
+    transform: rotate(270deg);
+    left: -55%;
+}
+
+.c3-1 {
+    top: 5%;
+}
+
+.c3-2 {
+    top: 28%;
+}
+
+.c3-3 {
+    top: 52%;
+}
+
+.c3-4 {
+    top: 75%;
+}
+
+.table:hover {
+    background-color: #6b4a2f;
+}
+
+.table-1 {
+    top: 50%;
+    left: 10%;
+    transform: translate(-50%, -50%);
+}
+
+.table-2 {
+    top: 50%;
+    left: 35%;
+    transform: translate(-50%, -50%);
+}
+
+.table-3 {
+    top: 50%;
+    left: 60%;
+    transform: translate(-50%, -50%);
+}
+
+.table-entrance {
+    top: 20px;
+    right: 20px;
+    height: 255px;
+}
+
+/* Форма */
+#bookingForm {
+    margin-top: 20px;
+}
+
+
+
+/* Стили для галереи */
+
+.gallery-grid {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.gallery-item {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.gallery-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 10px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.gallery-item:hover .gallery-overlay {
+    transform: translateY(0);
+}
+
+.gallery-text {
+    margin: 0;
+    font-size: 14px;
+    text-align: center;
+    font-size: 20px;
+}
+
+.container-gallery {
+    justify-content: space-around;
+}
+
+.text-off-gallery {
+    text-align: center;
+    grid-gap: 20px;
+    display: flex;
+    flex-direction: column;
+
+}
+
+#overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+#fullscreen-image {
+    max-width: 90%;
+    max-height: 90%;
+    border-radius: 10px;
+}
+
+
+#close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+    font-size: 40px;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+#close-btn:hover {
+    color: #ccc;
+}
+
+
+/* Страница О НАС */
+
+.about-impotant {
+    margin-top: 5%;
+}
+
+.about-contact {
+    margin-top: 5%;
+}
+
+
+.about-impotant-persons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.text-person {
+    margin-top: 10px;
+    font-size: 20px;
+}
+
+.impotant-person {
+    text-align: center;
+}
+
+.offer-about-us {
+    background-image: url(../img/offer-about-us.png);
+    background-repeat: no-repeat;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    background-size: cover;
+    color: #f6f6f5;
+    padding-top: 200px;
+}
+
+/* Стили для слайдера */
+.reviews-slider {
+    position: relative;
+    max-width: 800px;
+    margin: 0 auto;
+    overflow: hidden;
+}
+
+.review-card {
+    display: none;
+    transition: opacity 0.5s ease;
+}
+
+.review-card.active {
+    display: block;
+}
+
+/* Стили для карточек */
+.card {
+    text-align: center;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-img-retwit {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin: 0 auto 15px;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    font-size: 18px;
+    color: #555;
+}
+
+/* Кнопки управления */
+.slider-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: rgba(0, 0, 0, 0.5);
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    transition: background-color 0.3s ease;
+}
+
+.slider-button:hover {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.prev {
+    left: 10px;
+}
+
+.next {
+    right: 10px;
+}
+
+.about-us-tf {
+    display: flex;
+    grid-gap: 10px;
+    flex-direction: column;
+}
+
+.auo {
+    padding: 2%;
+    background-color: #24211ce4;
+}
+
+.icon-offer-2 img {
+    width: 10rem;
+    height: auto;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.about-us-first {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.about-us-first img {
+    width: 24rem;
+    height: auto;
+    border-radius: 10px;
+}
+
+.about-us-first {
+    margin-top: 3%;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 1.5%;
+    gap: 30px;
+}
+
+.about-us-first-text h3 {
+    text-align: center;
+}
+
+.about-us-first-text p {
+    font-size: 20px;
+}
+
+
+/* КОНТАКТЫ (НЕ С ШАСТУНОМ) для о нас */
+
+.contact {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    border: 2px solid #702f271b;
+    border-radius: 5px;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+    background-color: #fefffc;
+    padding: 1.5%;
+    font-size: 24px;
+}
+
+.tc-contact img {
+    width: 2rem;
+    height: auto;
+}
+
+.work-time {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    align-content: space-around;
+    flex-wrap: wrap;
+}
+
+.text-contact {
+    display: flex;
+    grid-gap: 10px;
+    flex-direction: column;
+}
+
+.day-work-time {
+    display: flex;
+    gap: 50px;
+}
+
+.tc-contact {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.tc-media {
+    display: flex;
+    margin-left: 20%;
+    gap: 30px;
+    align-items: center;
+}
+
+.tc-media img {
+    width: 2rem;
+    height: auto;
+}
+
+
+/* для текстов */
+.garmond-0 {
+    font-family: "EB Garamond", serif;
+    font-weight: 400;
+}
+
+.garmond-1 {
+    font-family: "EB Garamond", serif;
+    font-weight: 700;
+}
+
+.text-custom-1 {
+    font-family: "EB Garamond", serif;
+    color: #24211c;
+    font-weight: 700;
+    text-align: center;
+}
+
+.text-custom-2 {
+    font-family: "EB Garamond", serif;
+    color: #702f27;
+    margin-left: 40px;
+}
+
+.text-custom-2:hover {
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.text-body-secondary {
+    font-size: 14px;
+}
+
+/* Модальные окна входа-регистрации */
+
+.modal-login {
+    display: none;
+    position: fixed;
+    z-index: 3;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content-login {
+    background-color: #fefefe;
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 360px;
+    border-radius: 10px;
+}
+
+.close-login {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-login:hover {
+    color: black;
+}
+
+/* Стили модально окна */
+.btn-submit {
+    border: none;
+    border-radius: 10px;
+    background-color: #c0875c;
+    /* Основной цвет */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    padding: 1.5%;
+    font-size: 20px;
+    margin-top: 2%;
+}
+
+.btn-submit:hover {
+    background-color: #702f27;
+    /* Цвет при наведении (немного темнее) */
+    border-color: #c0875c;
+    /* Цвет границы при наведении */
+    color: #e0d4a8;
+    /* Цвет текста при наведении */
+}
+
+.btn-submit:active {
+    border: 2px solid #702f27;
+    color: #702f27;
+    background-color: white;
+}
+
+#loginForm,
+#registerForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 19px;
+    z-index: 999;
+}
+
+.btn-close-btn {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.div-forms {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.div-form label {
+    margin-bottom: 0;
+}
+
+.div-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.text-custom-1 {
+    font-family: "EB Garamond", serif;
+    color: #24211c;
+    font-weight: 700;
+    text-align: center;
+}
+
+.div-form input {
+    border-radius: 5px;
+    border: 1px solid #aaa;
+    padding: 1%;
+}
+
+.red {
+    color: red;
+    font-size: 23px;
+}
+
+.button-container {
+    position: relative;
+    z-index: 1000;
+    /* Убедитесь, что кнопка поверх других элементов */
+}
+
+.cart,
+.profile {
+    margin-bottom: 4%;
+    padding-top: 18%;
+}
+
+.set-carts {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    flex-direction: column;
+    width: 50%;
+}
+
+.cart-cart {
+    display: flex;
+    justify-content: space-between;
+    font-size: 20px;
+}
+
+.cart-once {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-direction: row;
+    gap: 30px;
+    padding: 5%;
+}
+
+.cart-once img {
+    width: 270px;
+    height: auto;
+}
+
+/* Скрываем чекбокс */
+.details-toggle {
+    display: none;
+}
+
+/* Стили для раскрывающегося блока */
+.details-content {
+    display: none;
+    /* Скрываем блок по умолчанию */
+    margin-top: 10px;
+    /* Отступ сверху */
+    padding: 10px;
+    /* Внутренний отступ */
+    background-color: #f9f9f9;
+    /* Фон */
+    border: 1px solid #ddd;
+    /* Рамка */
+    border-radius: 5px;
+    /* Скругление углов */
+}
+
+/* Показываем блок, если чекбокс отмечен */
+.details-toggle:checked~.details-content {
+    display: block;
+    display: flex;
+    justify-content: space-around;
+}
+
+.btn-prise {
+    border: none;
+    border-radius: 5px;
+    width: 30px;
+    font-family: "EB Garamond", serif;
+    font-size: 26px;
+}
+
+.btn-prise:active {
+    background-color: #fff;
+    border: 1px solid #702f27;
+    color: #702f27;
+}
+
+.user-card {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.user-card-img img {
+    width: 280px;
+    height: auto;
+    border-radius: 50%;
+    padding: 2%;
+}
+
+.user-card-img {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 24px;
+}
+
+.user-card-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 22px;
+    gap: 5px;
+}
+
+.set-tovars {
+    display: flex;
+    justify-content: space-between;
+}
+
+.tovar h3 {
+    margin-bottom: 0;
+}
+
+.red-0 {
+    text-align: center;
+    font-size: 18px;
+}
+
+.red-1 {
+    text-align: center;
+    font-size: 22px;
+}
+
+.total-sum {
+    width: 50%;
+}
+
+.delivery-address-container {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+}
+
+#chocolate:checked~.delivery-address-container {
+    max-height: 100px;
+    /* Максимальная высота блока */
+}
+
+li::marker {
+    color: #f0f8ff00;
+}
+
+.content-news {
+    text-align: center;
+}
+
+.btn.focus,
+.btn:focus {
+    box-shadow: 0 0 0 .2rem #6b4a2f2a;
+}
+
+iframe {
+    width: 500px;
+    height: 500px;
+}
+
+.card-img-top{
+    border-radius: 10px;
+}
+
+.admin-panel{
+    display: flex;
+    margin-top: 15%;
+    flex-direction: column;
+    align-items: center;
+}
+
+.dobavlenie{
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
+
+.dobavlenie button{
+    font-size: 16px;
+    width: 160px;
+    align-items: center;
+}
+
+.zakaz{
+    width: 100%;
+}
+
+/* стилизация прокрутки */
+::-webkit-scrollbar {
+    width: 0.5px; /* Ширина вертикальной полосы прокрутки */
+    height: 2px; /* Высота горизонтальной полосы прокрутки */
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #702f27; /* Цвет полосы прокрутки */
+}
+
+::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Цвет фона полосы прокрутки */
+}
+
+.pudding-b-m{
+    margin-top: 65px;
+}
+
+
+
+.avatar-image {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+    margin-bottom: 15px;
+}
+
+.btn-toggle-upload {
+    display: block;
+    margin: 0 auto 15px;
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn-toggle-upload:hover {
+    background-color: #0069d9;
+}
+
+.avatar-upload-container {
+    max-width: 300px;
+    margin: 0 auto 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.avatar-upload {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.form-control {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.btn:hover {
+    background-color: #218838;
+}
