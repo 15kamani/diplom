@@ -1,3 +1,7 @@
+<?php
+    session_start();
+    require 'components/db_connect.php';
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,8 +37,8 @@
     <?php
         include "components/footer.php"
     ?>
-</body>
-<!-- Подключите Bootstrap 5 JS -->
+
+    <!-- Подключите Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -42,5 +46,6 @@
 
 <script src="js/script.js"></script>
 <script src="js/script-modal.js"></script>
+</body>
 
 </html>
