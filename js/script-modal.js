@@ -125,3 +125,66 @@ document.addEventListener('DOMContentLoaded', function() {
         subtree: true
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Элементы управления
+    const btnToggleUpload = document.querySelector('.btn-toggle-upload');
+    const uploadContainer = document.querySelector('.avatar-upload-container');
+    const cancelBtn = document.querySelector('.cancel-upload');
+    const avatarForm = document.getElementById('avatarForm');
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarImage = document.querySelector('.avatar-image');
+    
+    // Показ/скрытие формы загрузки
+    if (btnToggleUpload && uploadContainer) {
+        btnToggleUpload.addEventListener('click', function() {
+            uploadContainer.style.display = uploadContainer.style.display === 'block' ? 'none' : 'block';
+        });
+        
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                uploadContainer.style.display = 'none';
+                avatarForm.reset();
+            });
+        }
+    }
+    
+    // Обработка отправки формы через AJAX
+    if (avatarForm) {
+        avatarForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(avatarForm);
+            
+            fetch('profile.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload(); // Перезагружаем страницу после успешной загрузки
+                } else {
+                    alert('Ошибка при загрузке аватара');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Произошла ошибка');
+            });
+        });
+    }
+    
+    // Превью аватара перед загрузкой
+    if (avatarInput) {
+        avatarInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    avatarImage.src = event.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+});

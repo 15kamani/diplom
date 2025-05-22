@@ -8,7 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // Подключение к базе данных
-require_once 'components/db_connect.php'; // Файл с настройками подключения к БД
+require_once 'components/db_connect.php';
 
 try {
     $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
@@ -19,8 +19,9 @@ try {
         throw new Exception("Пользователь не найден");
     }
 
-    // Путь к аватару (если NULL, подставляем дефолтный)
-    $avatar_path = $user['avatar_path'] ?: 'img/icon/default_avatar.png';
+    $avatar_path = (isset($user['avatar_path']) && file_exists($user['avatar_path'])) 
+        ? $user['avatar_path'] 
+        : 'img/icon/default_avatar.png';
 
 } catch (Exception $e) {
     die("Ошибка: " . $e->getMessage());
@@ -29,80 +30,74 @@ try {
 
 <!DOCTYPE html>
 <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <!-- Подключение Bootstrap CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
-            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-        <!-- Подключение стилей проекта -->
-        <link rel="stylesheet" href="css/style.css">
-        <link rel="stylesheet" href="css/media.css">
-        <!-- Шрифты -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link
-            href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&family=EB+Garamond:ital,wght@0,400..800;1,400..800&display=swap"
-            rel="stylesheet">
-        <!-- Иконка -->
-        <link rel="icon" href="img/favicon.png" type="image/x-icon">
-        <title>Кофе с СоВой</title>
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/media.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond&family=EB+Garamond&display=swap" rel="stylesheet">
+    <link rel="icon" href="img/favicon.png" type="image/x-icon">
+    <title>Кофе с СоВой</title>
+    <style>
+        .avatar-upload-container {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            display: none;
+        }
+        .avatar-image {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 50%;
+        }
+    </style>
+</head>
 <body class="container-0">
-<?php 
-    include 'components/header.php';
-?>
+<?php include 'components/header.php'; ?>
 
-
-
-    <main class="gallery">
-        <div class="profile">
-            <div class="kroshka">
-                <p><a href="index.php">Главная</a> > <a href="#">Профиль</a></p>
+<main class="gallery">
+    <div class="profile">
+        <div class="kroshka">
+            <p><a href="index.php">Главная</a> > <a href="#">Профиль</a></p>
+        </div>
+        <h1>Профиль</h1>
+        <div class="profile-card card">
+            <div class="user-card">
+                <div class="user-card-img">
+                    <img src="<?= htmlspecialchars($avatar_path) ?>" alt="Аватар" class="avatar-image">
+                    <button type="button" class="btn btn-secondary btn-toggle-upload mt-2">Обновить аватар</button>
+                    
+                    <div class="avatar-upload-container">
+                        <form id="avatarForm" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <input type="file" class="form-control" id="avatarInput" name="avatar" accept="image/*" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Загрузить</button>
+                            <button type="button" class="btn btn-outline-secondary cancel-upload ms-2">Отмена</button>
+                        </form>
+                    </div>
+                    
+                    <p class="text-custom-1 mt-2" id="cart"><?= htmlspecialchars($user['username']) ?></p>
+                </div>
+                <div class="user-card-info">
+                    <p><span class="garmond-1">ФИО: </span><?= htmlspecialchars($user['full_name']) ?></p>
+                    <p><span class="garmond-1">Телефон: </span><?= htmlspecialchars($user['phone']) ?></p>
+                    <p><span class="garmond-1">Почта: </span><?= htmlspecialchars($user['email']) ?></p>
+                </div>
             </div>
-            <h1>Профиль</h1>
-            <div class="profile-card card">
-                <div class="user-card">
-                    <div class="user-card-img">
-                        <img src="<?= htmlspecialchars($avatar_path) ?>" alt="Аватар" class="avatar-image">
-                        <button type="button" class="btn-toggle-upload">Обновить аватар</button>
-                        
-                        <div class="avatar-upload-container" style="display: none;">
-                            <form id="avatarForm" method="POST" action="upload_avatar.php" enctype="multipart/form-data">
-                                <div class="avatar-upload">
-                                    <input type="file" id="avatarInput" name="avatar" accept="image/*" class="form-control mb-2" required>
-                                    <button type="submit" class="btn btn-primary">Загрузить</button>
-                                </div>
-                            </form>
-                        </div>
-                        
-                        <p class="text-custom-1" id="cart"><?= htmlspecialchars($user['username']) ?></p>
-                    </div>
-                    <div class="user-card-info">
-                        <p><span class="garmond-1">ФИО: </span><?= htmlspecialchars($user['full_name']) ?></p>
-                        <p><span class="garmond-1">Телефон: </span><?= htmlspecialchars($user['phone']) ?></p>
-                        <p><span class="garmond-1">Почта: </span><?= htmlspecialchars($user['email']) ?></p>
-                    </div>
-                </div>
-                <div class="btn-logout">
-                    <a href="logout.php" class="btn btn-danger">Выйти</a>
-                </div>
+            <div class="btn-logout mt-3">
+                <a href="logout.php" class="btn btn-danger">Выйти</a>
             </div>
         </div>
-    </main>
+    </div>
+</main>
 
-    <script>
-        // Показ/скрытие формы загрузки аватара
-        document.querySelector('.btn-toggle-upload').addEventListener('click', function() {
-            const container = document.querySelector('.avatar-upload-container');
-            container.style.display = container.style.display === 'none' ? 'block' : 'none';
-        });
-    </script>
-    <?php
-    include './components/footer.php';
-    ?>
-
-        <!-- Подключите Bootstrap 5 JS -->
+<?php include 'components/footer.php'; ?>
+    <!-- Подключите Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -110,39 +105,44 @@ try {
 
 <script src="js/script.js"></script>
 <script src="js/script-modal.js"></script>
-</body>
-<script>
-document.querySelector('.btn-toggle-upload').addEventListener('click', function() {
-    const uploadContainer = document.querySelector('.avatar-upload-container');
-    if (uploadContainer.style.display === 'none') {
-        uploadContainer.style.display = 'block';
-        this.textContent = 'Скрыть';
-    } else {
-        uploadContainer.style.display = 'none';
-        this.textContent = 'Обновить аватар';
-    }
-});
 
-document.getElementById('avatarForm').addEventListener('submit', function(e) {
-    e.preventDefault();
+<?php
+// Обработка загрузки аватара
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
+    $uploadDir = __DIR__ . '/img/uploads/avatar/';
     
-    const formData = new FormData(this);
+    // Создаем директорию, если ее нет
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
     
-    fetch('', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => {
-        if (response.ok) {
-            location.reload(); // Перезагружаем страницу после успешной загрузки
-        } else {
-            alert('Ошибка при загрузке аватара');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Произошла ошибка');
-    });
-});
-</script>
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    $fileType = $_FILES['avatar']['type'];
+    
+    if (!in_array($fileType, $allowedTypes)) {
+        die("Недопустимый тип файла. Разрешены только JPEG, PNG и GIF.");
+    }
+    
+    // Генерируем уникальное имя файла
+    $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+    $newFileName = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $extension;
+    $uploadPath = $uploadDir . $newFileName;
+    
+    if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadPath)) {
+        // Обновляем путь в базе данных
+        $relativePath = 'img/uploads/avatar/' . $newFileName;
+        $stmt = $pdo->prepare("UPDATE users SET avatar_path = ? WHERE id = ?");
+        $stmt->execute([$relativePath, $_SESSION['user_id']]);
+        
+        // Обновляем сессию и перезагружаем страницу
+        $_SESSION['avatar_path'] = $relativePath;
+        header("Location: profile.php");
+        exit;
+    } else {
+        die("Ошибка при загрузке файла.");
+    }
+}
+?>
+
+</body>
 </html>

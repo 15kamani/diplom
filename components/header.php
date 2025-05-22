@@ -59,7 +59,7 @@
                             Меню
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="page/menu.php#novinki">Новинки</a>
+                            <a class="dropdown-item" href="page/menu.php">Новинки</a>
                             <a class="dropdown-item" href="page/menu.php#drinks">Напитки</a>
                             <a class="dropdown-item" href="page/menu.php#bistro">Бистро/Пекарня</a>
                             <a class="dropdown-item" href="page/menu.php#presents">Подарочные наборы</a>
@@ -74,15 +74,15 @@
                             Бронирование
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownBooking1">
-                            <a class="dropdown-item" href="page/booking.php">Забронировать столик</a>
-                            <a class="dropdown-item" href="page/booking.php#hall_reservation">Заказать зал</a>
+                            <a class="dropdown-item" href="../page/booking.php">Забронировать столик</a>
+                            <a class="dropdown-item" href="../page/booking.php#hall_reservation">Заказать зал</a>
                         </div>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="page/news.php">Новости</a>
+                        <a class="nav-link" href="../page/news.php">Новости</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="page/galery.php">Галерея</a>
+                        <a class="nav-link" href="../page/galery.php">Галерея</a>
                     </li>
 
                     <li class="nav-item dropdown">
@@ -91,10 +91,10 @@
                             О Нас
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownBooking2">
-                            <a class="dropdown-item" href="page/about-us.php">Кто мы?</a>
-                            <a class="dropdown-item" href="page/about-us.php#contact">Контакты</a>
-                            <a class="dropdown-item" href="page/about-us.php#impotant">Создатели</a>
-                            <a class="dropdown-item" href="page/about-us.php#retwit">Отзывы</a>
+                            <a class="dropdown-item" href="../page/about-us.php">Кто мы?</a>
+                            <a class="dropdown-item" href="../page/about-us.php#contact">Контакты</a>
+                            <a class="dropdown-item" href="../page/about-us.php#impotant">Создатели</a>
+                            <a class="dropdown-item" href="../page/about-us.php#retwit">Отзывы</a>
                         </div>
                     </li>
                 </ul>
@@ -129,7 +129,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item active">
-                        <a class="nav-link" href="index.php">Главная</a>
+                        <a class="nav-link" href="../index.php">Главная</a>
                     </li>
                 
                     <?php if(isset($_SESSION['user_id'])): ?>
@@ -139,8 +139,8 @@
                             Профиль
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="profile.php">Профиль</a>
-                            <a class="dropdown-item" href="profile.php">Корзина</a>
+                            <a class="dropdown-item" href="../profile.php">Профиль</a>
+                            <a class="dropdown-item" href="../profile.php">Корзина</a>
                         </div>
                     </li>
                     <?php endif; ?>
@@ -151,41 +151,41 @@
                             Меню
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="page/menu.php#novinki1">Новинки</a>
-                            <a class="dropdown-item" href="page/menu.php#drinks1">Напитки</a>
-                            <a class="dropdown-item" href="page/menu.php#bistro1">Бистро/Пекарня</a>
-                            <a class="dropdown-item" href="page/menu.php#presents1">Подарочные наборы</a>
+                            <a class="dropdown-item" href="../page/menu.php#novinki1">Новинки</a>
+                            <a class="dropdown-item" href="../page/menu.php#drinks1">Напитки</a>
+                            <a class="dropdown-item" href="../page/menu.php#bistro1">Бистро/Пекарня</a>
+                            <a class="dropdown-item" href="../page/menu.php#presents1">Подарочные наборы</a>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="page/delivery.php#deliver">Доставка</a>
+                        <a class="nav-link" href="../page/delivery.php#deliver">Доставка</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="page/booking.php" id="navbarDropdownBooking"
+                        <a class="nav-link dropdown-toggle" href="../page/booking.php" id="navbarDropdownBooking"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Бронирование
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownBooking">
-                            <a class="dropdown-item" href="page/booking.php">Забронировать столик</a>
-                            <a class="dropdown-item" href="page/booking.php#hall_reservation">Заказать зал</a>
+                            <a class="dropdown-item" href="../page/booking.php">Забронировать столик</a>
+                            <a class="dropdown-item" href="../page/booking.php#hall_reservation">Заказать зал</a>
                         </div>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="page/news.php">Новости</a>
+                        <a class="nav-link" href="../page/news.php">Новости</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="page/galery.php">Галерея</a>
+                        <a class="nav-link" href="../page/galery.php">Галерея</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="page/about-us.php" id="navbarDropdownAbout"
+                        <a class="nav-link dropdown-toggle" href="../page/about-us.php" id="navbarDropdownAbout"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             О Нас
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
-                            <a class="dropdown-item" href="page/about-us.php">Кто мы?</a>
-                            <a class="dropdown-item" href="page/about-us.php#contact">Контакты</a>
-                            <a class="dropdown-item" href="page/about-us.php#impotant">Создатели</a>
-                            <a class="dropdown-item" href="page/about-us.php#retwit">Отзывы</a>
+                            <a class="dropdown-item" href="../page/about-us.php">Кто мы?</a>
+                            <a class="dropdown-item" href="../page/about-us.php#contact">Контакты</a>
+                            <a class="dropdown-item" href="../page/about-us.php#impotant">Создатели</a>
+                            <a class="dropdown-item" href="../page/about-us.php#retwit">Отзывы</a>
                         </div>
                     </li>
                 </ul>

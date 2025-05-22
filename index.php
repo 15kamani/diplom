@@ -1,6 +1,17 @@
 <?php
     session_start();
     require 'components/db_connect.php';
+
+
+
+    // Получаем активные новости
+try {
+    $stmt = $pdo->prepare("SELECT * FROM news WHERE is_active = 1 ORDER BY date DESC");
+    $stmt->execute();
+    $news = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    $news = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -29,13 +40,45 @@
         include "modal/login.php";
         include "modal/register.php";
     ?>
+        <div class="offer">
+        <div class="offer-text hidden">
+            <h2>Где бы ты ни был, чем бы ни занимался:</h2>
+            <div class="icons-for-offer">
+                <div class="icon-offer">
+                    <img src="img/offer/work.png" alt="">
+                    <p>на работе</p>
+                </div>
+                <div class="icon-offer">
+                    <img src="img/offer/romantic-date.png" alt="">
+                    <p>романтическом свидании</p>
+                </div>
+                <div class="icon-offer">
+                    <img src="img/offer/walking.png" alt="">
+                    <p>на прогулке</p>
+                </div>
+            </div>
+            <h2>Кофе с СоВой всегда рядом с тобой!</h2>
 
+            <h3>Также у нас вы можете:</h3>
+            <h3>- приобрести молотый кофе и чай</h3>
+            <h3>- заказать кофейно-чайные букеты</h3>
+            <div class="offer-btn">
+                <a href="page/menu.html"><button class="btn btn-custom">Подробности ></button></a>
+            </div>
+        </div>
+    </div>
+        <div id="tooltip" class="tooltip">Номер скопирован!</div>
     <main>
         <!-- Основной контент -->
+        <!-- карусель -->
+        <?php
+            include 'components/event.php';
+        ?>
+</div>
     </main>
 
     <?php
-        include "components/footer.php"
+        include "components/footer.php";
     ?>
 
     <!-- Подключите Bootstrap 5 JS -->
