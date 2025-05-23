@@ -1,21 +1,21 @@
 <header>
     <div class="top-menu">
         <div class="media-icon hidden">
-            <a href="https://vk.com/coffeessovoy35"><img src="img/icon/vk.png" alt="Вконтакте"></a>
-            <a href="https://wa.me/79115128112"><img src="img/icon/instagram.png" alt="Ватсап"></a>
-            <a href="https://www.instagram.coffeessovoy35"><img src="img/icon/whatsapp.png" alt="Инстаграм"></a>
+            <a href="https://vk.com/coffeessovoy35"><img src="../img/icon/vk.png" alt="Вконтакте"></a>
+            <a href="https://wa.me/79115128112"><img src="../img/icon/instagram.png" alt="Ватсап"></a>
+            <a href="https://www.instagram.coffeessovoy35"><img src="../img/icon/whatsapp.png" alt="Инстаграм"></a>
         </div>
         <div class="logo">
-            <a href="#"><img src="img/header/logo.jpg" alt="Логотип кофейни 'Кофе с СоВой'"></a>
+            <a href="#"><img src="../img/header/logo.jpg" alt="Логотип кофейни 'Кофе с СоВой'"></a>
         </div>
         <div class="contact-menu hidden">
             <div class="contact-tools">
                 <div class="contact-tool">
-                    <img src="img/header/location.png" alt="Город, где находится чудестная кофейня">
+                    <img src="../img/header/location.png" alt="Город, где находится чудестная кофейня">
                     <a>Вытегра</a>
                 </div>
                 <div class="contact-tool">
-                    <div class="text-to-copy" onclick="copyText(this)"><img src="img/header/phone.png"
+                    <div class="text-to-copy" onclick="copyText(this)"><img src="../img/header/phone.png"
                             alt="Номер телефона для связи">+7 (911) 512-81-12</div>
                 </div>
             </div>
@@ -37,7 +37,7 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item active">
-                        <a class="nav-link" href="index.php">Главная</a>
+                        <a class="nav-link" href="../index.php">Главная</a>
                     </li>
 
                     <?php if(isset($_SESSION['user_id'])): ?>
@@ -47,8 +47,8 @@
                             Профиль
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="profile.php">Профиль</a>
-                            <a class="dropdown-item" href="profile.php">Корзина</a>
+                            <a class="dropdown-item" href="../profile.php">Профиль</a>
+                            <a class="dropdown-item" href="../profile.php">Корзина</a>
                         </div>
                     </li>
                     <?php endif; ?>
@@ -59,14 +59,14 @@
                             Меню
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="page/menu.php">Новинки</a>
-                            <a class="dropdown-item" href="page/menu.php#drinks">Напитки</a>
-                            <a class="dropdown-item" href="page/menu.php#bistro">Бистро/Пекарня</a>
-                            <a class="dropdown-item" href="page/menu.php#presents">Подарочные наборы</a>
+                            <a class="dropdown-item" href="../page/menu.php">Новинки</a>
+                            <a class="dropdown-item" href="../page/menu.php#drinks">Напитки</a>
+                            <a class="dropdown-item" href="../page/menu.php#bistro">Бистро/Пекарня</a>
+                            <a class="dropdown-item" href="../page/menu.php#presents">Подарочные наборы</a>
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="page/delivery.php#deliver">Доставка</a>
+                        <a class="nav-link" href="delivery.php#deliver">Доставка</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBooking1" role="button"
@@ -158,7 +158,7 @@
                         </div>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../page/delivery.php#deliver">Доставка</a>
+                        <a class="nav-link" href="delivery.php#deliver">Доставка</a>
                     </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="../page/booking.php" id="navbarDropdownBooking"

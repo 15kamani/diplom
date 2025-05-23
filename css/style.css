@@ -1389,6 +1389,9 @@ iframe {
 
 .card-img-top{
     border-radius: 10px;
+    object-fit: cover;
+    width: 246.4px;
+    height: 246.4px;
 }
 
 .admin-panel{

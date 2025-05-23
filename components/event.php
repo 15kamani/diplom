@@ -40,9 +40,11 @@ if ($event):
                     $first = true;
                     for ($i = 1; $i <= 4; $i++):
                         if (!empty($event["image{$i}"])):
+                            // Удаляем ../ из начала пути
+                            $imagePath = ltrim($event["image{$i}"], './.');
                     ?>
                         <div class="carousel-item <?= $first ? 'active' : '' ?>">
-                            <img src="<?= htmlspecialchars($event["image{$i}"]) ?>" class="d-block w-100" alt="Image <?= $i ?>">
+                            <img src="<?= htmlspecialchars($imagePath) ?>" class="d-block w-100" alt="Image <?= $i ?>">
                         </div>
                     <?php
                             $first = false;

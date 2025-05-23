@@ -25,6 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['event_id'])) {
     $_SESSION['message'] = 'Событие успешно удалено!';
 }
 
-header('Location: ../admin.php?page=events');
+header('Location: event.php?page=events');
 exit();
 ?>

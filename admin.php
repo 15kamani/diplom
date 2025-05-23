@@ -114,9 +114,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
             <a href="logout.php" class="btn btn-logout">Выйти из системы</a>
         </div>
         
-        <?php
-            require "admin/event.php";
-        ?>
+        <a href="admin/event.php">Ивент</a>
+        <a href="admin/news.php">блог</a>
+
 
     </div>
 

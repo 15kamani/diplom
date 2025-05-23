@@ -1,5 +1,11 @@
 <?php
+session_start();
+require '../components/db_connect.php';
 
+if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
+    echo "<script>window.location.href = 'index.php';</script>";
+    exit();
+}
 // Обработка формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $title = $_POST['title'] ?? '';
@@ -11,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $uploaded_images = [];
     for ($i = 1; $i <= 4; $i++) {
         if (!empty($_FILES["image{$i}"]['name'])) {
-            $target_dir = "uploads/events/";
+            $target_dir = "../img/uploads/events/";
             if (!is_dir($target_dir)) {
                 mkdir($target_dir, 0755, true);
             }
@@ -41,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ]);
     
     $_SESSION['message'] = 'Событие успешно добавлено!';
-    header('Location: admin.php?page=events');
+    header('Location: event.php?page=events');
     exit();
 }
 
@@ -50,6 +56,7 @@ $events = $pdo->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll
 ?>
 
 <div class="admin-container">
+    <a href="../admin.php">Назад</a>
     <h2>Управление событиями</h2>
     
     <!-- Форма добавления нового события -->
@@ -129,7 +136,7 @@ $events = $pdo->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll
                         
                         <a href="<?= htmlspecialchars($event['event_url']) ?>" target="_blank" class="event-link">Перейти к событию</a>
                         
-                        <form method="POST" action="admin/delete_event.php" class="delete-form">
+                        <form method="POST" action="delete_event.php" class="delete-form">
                             <input type="hidden" name="event_id" value="<?= $event['id'] ?>">
                             <button type="submit" class="btn-delete">Удалить</button>
                         </form>
