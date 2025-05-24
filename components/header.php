@@ -49,6 +49,7 @@
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <a class="dropdown-item" href="profile.php">Профиль</a>
                             <a class="dropdown-item" href="profile.php">Корзина</a>
+                            
                         </div>
                     </li>
                     <?php endif; ?>

@@ -116,6 +116,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
         
         <a href="admin/event.php">Ивент</a>
         <a href="admin/news.php">блог</a>
+        <a href="admin/menu.php">МЕНЮ</a>
 
 
     </div>
