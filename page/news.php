@@ -2,12 +2,6 @@
 session_start();
 require_once '../components/db_connect.php';
 
-// Проверка авторизации
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../index.php");
-    exit();
-}
-
 // Получаем текущий год и месяц
 $currentYear = date('Y');
 $currentMonth = date('m');

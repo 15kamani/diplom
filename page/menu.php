@@ -93,7 +93,7 @@ try {
     
     <!-- Подключение стилей проекта -->
     <link rel="stylesheet" href="../css/style-menu.css">
-    <link rel="stylesheet" href="../css/media-.css">
+    <link rel="stylesheet" href="../css/media.css">
     
     <!-- Шрифты -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -405,10 +405,10 @@ try {
             
 <!-- Блок подарочных наборов -->
 <div class="menu-contaner" id="gifts">
-    <h1>Подарочные наборы</h1>
+    <h1 id="presents">Подарочные наборы</h1>
     
     <!-- Десктопная версия (4 карточки в ряд) -->
-    <div class="container my-5 keep_secret">
+    <div class="container my-5 keep_secret" id="presents1">
         <div id="giftsCarousel" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                     <div class="row">
@@ -533,5 +533,62 @@ try {
     <script src="../js/script.js"></script>
     <script src="../js/script-modal.js"></script>
     
+    <script>
+            // Обработчик кнопок "В корзину"
+            document.addEventListener('DOMContentLoaded', function() {
+                document.querySelectorAll('.add-to-cart').forEach(button => {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        const itemId = this.getAttribute('data-item-id');
+                        const variant = this.getAttribute('data-variant') || null;
+                        const price = this.getAttribute('data-price');
+                        
+                        fetch('../components/add_to_cart.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                menu_item_id: itemId,
+                                variant_name: variant,
+                                price: price
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'error' && data.message === 'Требуется авторизация') {
+                                // Показываем модальное окно входа
+                                const loginModal = new bootstrap.Modal(document.getElementById('LoginModal'));
+                                loginModal.show();
+                            } else {
+                                // Показываем уведомление
+                                alert(data.message);
+                                // Можно обновить счетчик корзины в шапке
+                                updateCartCounter();
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('Произошла ошибка при добавлении в корзину');
+                        });
+                    });
+                });
+            });
+
+            // Функция для обновления счетчика корзины
+            function updateCartCounter() {
+                fetch('../components/get_cart_count.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            const counter = document.getElementById('cart-counter');
+                            if (counter) {
+                                counter.textContent = data.count;
+                            }
+                        }
+                    });
+            }
+    </script>
 </body>
 </html>

@@ -733,3 +733,64 @@ footer a:hover {
 .keep_secret{
     display: block;
 }
+
+
+/* Стили для счетчика количества */
+.quantity-input {
+    text-align: center;
+    padding: 0.25rem 0.5rem;
+}
+
+/* Анимация при изменении количества */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.quantity-input:focus {
+    animation: pulse 0.3s ease;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Кнопка удаления */
+.remove-from-cart {
+    transition: all 0.2s ease;
+}
+
+.remove-from-cart:hover {
+    transform: scale(1.1);
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+/* Добавьте в ваш CSS-файл */
+.quantity-input {
+    transition: all 0.3s ease;
+}
+
+.quantity-input:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    transform: scale(1.05);
+}
+
+.remove-from-cart {
+    transition: all 0.2s ease;
+}
+
+.remove-from-cart:hover {
+    transform: scale(1.1);
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+@keyframes highlightUpdate {
+    0% { background-color: rgba(25, 135, 84, 0.1); }
+    100% { background-color: transparent; }
+}
+
+.updated-row {
+    animation: highlightUpdate 1.5s ease;
+}

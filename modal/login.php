@@ -1,7 +1,4 @@
 <?php
-// Первая строка - session_start(), никаких пробелов!
-
-// Подключение БД (убедитесь, что в db_connect.php нет вывода)
 require_once __DIR__ . '/../components/db_connect.php';
 
 $errors = [];

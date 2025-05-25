@@ -54,6 +54,35 @@ try {
             max-height: 150px;
             border-radius: 50%;
         }
+        /* Стили для корзины */
+.cart-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 30px;
+}
+
+.cart-item-image {
+    max-width: 50px;
+    max-height: 50px;
+    object-fit: cover;
+}
+
+.remove-from-cart {
+    cursor: pointer;
+}
+
+/* Адаптивные стили */
+@media (max-width: 768px) {
+    .cart-section table {
+        font-size: 14px;
+    }
+    
+    .cart-section th, 
+    .cart-section td {
+        padding: 5px;
+    }
+}
     </style>
 </head>
 <body class="container-0">
@@ -94,7 +123,92 @@ try {
             </div>
         </div>
     </div>
-
+<!-- Секция корзины -->
+<div class="cart-section mt-5">
+    <h2>Ваша корзина</h2>
+    <div id="cart-items">
+        <?php
+        $cartItems = [];
+        $total = 0;
+        
+        try {
+            if (isset($_SESSION['user_id'])) {
+                $stmt = $pdo->prepare("
+                    SELECT c.*, m.title, m.image 
+                    FROM cart c
+                    JOIN menu_items m ON c.menu_item_id = m.id
+                    WHERE c.user_id = ?
+                ");
+                $stmt->execute([$_SESSION['user_id']]);
+                $cartItems = $stmt->fetchAll();
+            }
+            
+            if (empty($cartItems)) {
+                echo '<p>Ваша корзина пуста</p>';
+            } else {
+        ?>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Товар</th>
+                        <th>Вариант</th>
+                        <th>Цена</th>
+                        <th>Кол-во</th>
+                        <th>Сумма</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($cartItems as $item): 
+                        $itemSum = $item['price'] * $item['quantity'];
+                        $total += $itemSum;
+                    ?>
+                        <tr>
+                            <td>
+                                <?php if ($item['image']): ?>
+                                    <img src="../<?= htmlspecialchars($item['image']) ?>" width="50" class="me-2">
+                                <?php endif; ?>
+                                <?= htmlspecialchars($item['title']) ?>
+                            </td>
+                            <td><?= $item['variant_name'] ? htmlspecialchars($item['variant_name']) : '-' ?></td>
+                            <td><?= htmlspecialchars($item['price']) ?> руб.</td>
+                            <td>
+                                <input type="number" 
+                                       class="form-control quantity-input" 
+                                       value="<?= htmlspecialchars($item['quantity']) ?>" 
+                                       min="1" max="100"
+                                       data-cart-id="<?= $item['id'] ?>"
+                                       data-old-value="<?= htmlspecialchars($item['quantity']) ?>"
+                                       style="width: 70px;">
+                            </td>
+                            <td><?= $itemSum ?> руб.</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger remove-from-cart" 
+                                        data-cart-id="<?= $item['id'] ?>">
+                                    Удалить
+                                </button>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="text-end mt-3">
+            <h4>Итого: <?= $total ?> руб.</h4>
+            <button class="btn btn-primary checkout-btn">Оформить заказ</button>
+        </div>
+        
+        <?php 
+            } // закрытие else
+        } catch (PDOException $e) {
+            echo '<div class="alert alert-danger">Ошибка при загрузке корзины: ' . htmlspecialchars($e->getMessage()) . '</div>';
+        }
+        ?>
+    </div>
+</div>
 </main>
 
 <?php include 'components/footer.php'; ?>
@@ -144,6 +258,108 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
     }
 }
 ?>
+<!-- Скрипты для работы с корзиной -->
+<script>
+// Обработчик удаления товара
+document.getElementById('cart-items').addEventListener('click', async function(e) {
+    if (e.target.classList.contains('remove-from-cart')) {
+        e.preventDefault();
+        const cartId = e.target.dataset.cartId;
+        
+        try {
+            const response = await fetch(`components/remove_from_cart.php?id=${cartId}`);
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                // Плавное исчезновение строки
+                const row = e.target.closest('tr');
+                row.style.transition = 'opacity 0.3s';
+                row.style.opacity = '0';
+                
+                // Обновление через 300мс
+                setTimeout(() => {
+                    location.reload();
+                }, 300);
+            } else {
+                alert(`Ошибка: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Произошла ошибка при удалении товара');
+        }
+    }
+});
+
+// Обработчик изменения количества
+document.getElementById('cart-items').addEventListener('change', async function(e) {
+    if (e.target.classList.contains('quantity-input')) {
+        const input = e.target;
+        const cartId = input.dataset.cartId;
+        const newQuantity = parseInt(input.value);
+        const oldValue = parseInt(input.dataset.oldValue);
+
+        // Валидация
+        if (isNaN(newQuantity) || newQuantity < 1 || newQuantity > 100) {
+            alert('Количество должно быть от 1 до 100');
+            input.value = oldValue;
+            return;
+        }
+
+        try {
+            const response = await fetch('components/update_cart.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cart_id: cartId,
+                    quantity: newQuantity
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                // Обновляем старую цену
+                input.dataset.oldValue = newQuantity;
+                
+                // Пересчитываем сумму
+                const row = input.closest('tr');
+                const price = parseFloat(row.querySelector('td:nth-child(3)').textContent);
+                const sumCell = row.querySelector('td:nth-child(5)');
+                sumCell.textContent = (price * newQuantity).toFixed(2) + ' руб.';
+                
+                // Пересчитываем общую сумму
+                updateTotalSum();
+            } else {
+                alert(`Ошибка: ${result.message}`);
+                input.value = oldValue;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Произошла ошибка при обновлении количества');
+            input.value = oldValue;
+        }
+    }
+});
+
+// Функция для пересчета общей суммы
+function updateTotalSum() {
+    let total = 0;
+    document.querySelectorAll('#cart-items tbody tr').forEach(row => {
+        const sumText = row.querySelector('td:nth-child(5)').textContent;
+        total += parseFloat(sumText);
+    });
+    
+    document.querySelector('.checkout-btn').previousElementSibling.innerHTML = 
+        `Итого: ${total.toFixed(2)} руб.`;
+}
+    
+    // Обработчик оформления заказа
+    document.querySelector('.checkout-btn')?.addEventListener('click', function() {
+        alert('Функционал оформления заказа будет реализован позже');
+});
+</script>
 
 </body>
 </html>
