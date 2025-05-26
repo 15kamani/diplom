@@ -59,10 +59,10 @@
                             Меню
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="../page/menu.php">Новинки</a>
-                            <a class="dropdown-item" href="../page/menu.php#drinks">Напитки</a>
-                            <a class="dropdown-item" href="../page/menu.php#bistro">Бистро/Пекарня</a>
-                            <a class="dropdown-item" href="../page/menu.php#presents">Подарочные наборы</a>
+                            <a class="dropdown-item" href="menu.php">Новинки</a>
+                            <a class="dropdown-item" href="menu.php#drinks">Напитки</a>
+                            <a class="dropdown-item" href="menu.php#bistro">Бистро/Пекарня</a>
+                            <a class="dropdown-item" href="menu.php#presents">Подарочные наборы</a>
                         </div>
                     </li>
                     <li class="nav-item">
@@ -82,7 +82,7 @@
                         <a class="nav-link" href="news.php">Новости</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../page/galery.php">Галерея</a>
+                        <a class="nav-link" href="galery.php">Галерея</a>
                     </li>
 
                     <li class="nav-item dropdown">
@@ -91,10 +91,10 @@
                             О Нас
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownBooking2">
-                            <a class="dropdown-item" href="../page/about-us.php">Кто мы?</a>
-                            <a class="dropdown-item" href="../page/about-us.php#contact">Контакты</a>
-                            <a class="dropdown-item" href="../page/about-us.php#impotant">Создатели</a>
-                            <a class="dropdown-item" href="../page/about-us.php#retwit">Отзывы</a>
+                            <a class="dropdown-item" href="about-us.php">Кто мы?</a>
+                            <a class="dropdown-item" href="about-us.php#contact">Контакты</a>
+                            <a class="dropdown-item" href="about-us.php#impotant">Создатели</a>
+                            <a class="dropdown-item" href="about-us.php#retwit">Отзывы</a>
                         </div>
                     </li>
                 </ul>
@@ -105,13 +105,13 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-f7eabd" id="none-display">
         <div class="container-fluid">
             <!-- Логотип -->
-            <a href="index.php"><img src="img/header/logo.jpg" alt="Логотип" class="logo-burger"></a>
+            <a href="../index.php"><img src="../img/header/logo.jpg" alt="Логотип" class="logo-burger"></a>
 
             <!-- Кнопка "Войти" или "Выйти" -->
             <div class="btn-order">
                 <div class="button-container">
                     <?php if(isset($_SESSION['user_id'])): ?>
-                        <button class="hover-button" onclick="window.location.href='logout.php'">Выйти</button>
+                        <button class="hover-button" onclick="window.location.href='../logout.php'">Выйти</button>
                     <?php else: ?>
                         <button class="hover-button" data-bs-target="#LoginModal" data-bs-toggle="modal">Войти</button>
                     <?php endif; ?>
@@ -174,18 +174,18 @@
                         <a class="nav-link" href="news.php">Новости</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="../page/galery.php">Галерея</a>
+                        <a class="nav-link" href="galery.php">Галерея</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="../page/about-us.php" id="navbarDropdownAbout"
+                        <a class="nav-link dropdown-toggle" href="about-us.php" id="navbarDropdownAbout"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             О Нас
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownAbout">
-                            <a class="dropdown-item" href="../page/about-us.php">Кто мы?</a>
-                            <a class="dropdown-item" href="../page/about-us.php#contact">Контакты</a>
-                            <a class="dropdown-item" href="../page/about-us.php#impotant">Создатели</a>
-                            <a class="dropdown-item" href="../page/about-us.php#retwit">Отзывы</a>
+                            <a class="dropdown-item" href="about-us.php">Кто мы?</a>
+                            <a class="dropdown-item" href="about-us.php#contact">Контакты</a>
+                            <a class="dropdown-item" href="about-us.php#impotant">Создатели</a>
+                            <a class="dropdown-item" href="about-us.php#retwit">Отзывы</a>
                         </div>
                     </li>
                 </ul>

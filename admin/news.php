@@ -110,6 +110,8 @@ if ($action === 'edit' && $id > 0) {
 ?>
 
 <div class="admin-news">
+    <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
+    
     <?php if (isset($error)): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
@@ -125,9 +127,9 @@ if ($action === 'edit' && $id > 0) {
     <?php endif; ?>
     
     <?php if ($action === 'list' || $action === 'delete'): ?>
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="news-header">
             <h2>Управление новостями</h2>
-            <a href="news.php?page=news&action=add" class="btn btn-primary">Добавить новость</a>
+            <a href="news.php?page=news&action=add" class="btn-custom">Добавить новость</a>
         </div>
         
         <?php
@@ -138,7 +140,7 @@ if ($action === 'edit' && $id > 0) {
         
         <?php if (count($newsList) > 0): ?>
             <div class="table-responsive">
-                <table class="table table-striped">
+                <table class="table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -154,14 +156,16 @@ if ($action === 'edit' && $id > 0) {
                                 <td><?= $item['id'] ?></td>
                                 <td>
                                     <?php if (!empty($item['image'])): ?>
-                                        <img src="../<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" style="max-width: 100px;">
+                                        <img src="../<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="img-thumbnail">
                                     <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($item['title']) ?></td>
                                 <td><?= date('d.m.Y', strtotime($item['date'])) ?></td>
                                 <td>
-                                    <a href="news.php?page=news&action=edit&id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">Редактировать</a>
-                                    <a href="news.php?page=news&action=delete&id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту новость?')">Удалить</a>
+                                    <div class="d-flex gap-2">
+                                        <a href="news.php?page=news&action=edit&id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">Редактировать</a>
+                                        <a href="news.php?page=news&action=delete&id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту новость?')">Удалить</a>
+                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -180,9 +184,9 @@ if ($action === 'edit' && $id > 0) {
             
             <?php if (isset($news['image']) && !empty($news['image'])): ?>
                 <input type="hidden" name="existing_image" value="<?= htmlspecialchars($news['image']) ?>">
-                <div class="mb-3">
+                <div class="form-group mb-3">
                     <label>Текущее изображение:</label>
-                    <img src="../<?= htmlspecialchars($news['image']) ?>" alt="Current image" class="img-thumbnail" style="max-width: 200px; display: block;">
+                    <img src="../<?= htmlspecialchars($news['image']) ?>" alt="Current image" class="img-thumbnail" style="max-width: 200px;">
                 </div>
             <?php endif; ?>
             
@@ -222,10 +226,233 @@ if ($action === 'edit' && $id > 0) {
                        value="<?= htmlspecialchars($news['date'] ?? date('Y-m-d')) ?>">
             </div>
             
-            <div class="form-group">
+            <div class="form-group d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <a href="news.php?page=news" class="btn btn-secondary">Отмена</a>
             </div>
         </form>
     <?php endif; ?>
 </div>
+
+<style>
+    html{
+        background-color: #f7eabd;
+    }
+
+    .btn-custom {
+    background-color: #c0875c;
+    /* Основной цвет */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    /* Цвет текста (темный для контраста) */
+    padding: 1%;
+    border-radius: 10px;
+    }
+
+    .btn-custom:hover {
+        background-color: #702f27;
+        /* Цвет при наведении (немного темнее) */
+        border-color: #c0875c;
+        /* Цвет границы при наведении */
+        color: #e0d4a8;
+        /* Цвет текста при наведении */
+    }
+    /* Общие стили из админ-панели */
+    .admin-news {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-top: 2rem;
+        margin-bottom: 3rem;
+        margin-left: 12%;
+        margin-right: 12%;
+    }
+    
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+    
+    .alert-info {
+        background-color: #e7f5fe;
+        color: #0c5460;
+        border-left: 4px solid #17a2b8;
+    }
+    
+    h2 {
+        color: var(--dark);
+        margin-bottom: 1.5rem;
+        font-size: 1.75rem;
+        border-bottom: 2px solid var(--accent);
+        padding-bottom: 0.5rem;
+    }
+    
+    /* Кнопка "Назад" */
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .back-link:hover {
+        color: #a57352;
+        text-decoration: underline;
+    }
+    
+    /* Стили для таблицы новостей */
+    .news-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+    
+    .table th {
+        background-color: var(--accent);
+        color: white;
+        padding: 1rem;
+        text-align: left;
+    }
+    
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+    }
+    
+    .table tr:hover {
+        background-color: #f9f9f9;
+    }
+    
+    .table img {
+        max-width: 100px;
+        border-radius: 4px;
+    }
+    
+    /* Стили для формы */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(192, 135, 92, 0.2);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .img-thumbnail {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 0.25rem;
+        background-color: white;
+    }
+    
+    /* Кнопки (без анимации) */
+    .btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+    }
+    
+    .btn-primary {
+        background-color: var(--accent);
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #a57352;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .admin-news {
+            padding: 1rem;
+        }
+        
+        .news-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .table th, .table td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .table img {
+            max-width: 60px;
+        }
+    }
+</style>

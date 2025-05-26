@@ -1,0 +1,390 @@
+@media (max-width: 980px ){
+    .top-menu{
+        display: none;
+    }
+
+    .secret{
+        display: block;
+    }
+
+    .keep_secret {
+        display: none;
+    }
+
+    .about-impotant-persons{
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    .impotant-person{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .offer-text{
+        margin-top: 4%;
+    }
+
+    #novinki{
+        margin-top: 100px;
+    }
+
+    #novinki-1{
+        margin-top: 26%;
+    }
+
+    .kroshka{
+        text-align: start;
+        padding-top: 2%;
+    }
+
+    .buttom-menu{
+        display: none;
+    }
+    #none-display{
+        display: flex;
+        font-size: 20px;
+        position: fixed;
+        z-index: 3;
+        width: 100%;
+        top: 0;
+    }
+
+    .gallery {
+        margin-top: 130px;
+    }
+
+    .bg-f7eabd{
+        background-color: #24211C;
+        color: #f7eabd;
+    }
+
+    .menu-footer {
+        display: flex;
+        justify-content: space-evenly;
+        font-size: 18px;
+        flex-direction: column;
+        align-items: center;
+    }
+    .navbar-nav {
+        background-color: #f7eabd; /* Цвет фона меню */
+        padding: 10px;
+        align-items: center;
+    }
+
+    .navbar-toggler {
+        border: none;
+        outline: none;
+    }
+
+    .navbar-toggler-icon {
+        border: 20px;
+    }
+
+    .navbar-collapse {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        z-index: 1000;
+        background-color: #f7eabd;
+        box-shadow: 0 4px 6px #24211C;
+        overflow-y: auto;
+        max-height: 75vh;
+    }
+
+    .nav-item {
+        margin: 10px 0;
+    }
+
+    .dropdown-menu {
+        border: none;
+    }
+
+    .dropdown-item {
+        padding: 10px 20px;
+    }
+
+    .media-icon,
+    .contact-menu {
+        display: none; /* Скрываем иконки и контакты на мобильных устройствах */
+    }
+
+    .container-fluid img{
+        padding: 2%;
+    }
+
+    #carouselExample{
+        width: 100%;
+    }
+
+    .event-text p{
+        font-size: 18px;
+    }
+
+    .btn-custom{
+        font-size: 16px;
+    }
+
+    .icon-offer img{
+        width: 4rem;
+    }
+
+    .navbar-light .navbar-toggler-icon{
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3e%3cpath stroke='%23f7eabd' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    .navbar-light .navbar-toggler {
+        color: #f7eabd;
+        border-color: #f7eabd;
+    }
+    .nav-item:hover{
+        border-bottom: 2px solid #24211C;
+    }
+
+    .button-container {
+        position: relative;
+        z-index: 1000; /* Убедитесь, что кнопка поверх других элементов */
+    }
+
+    .offer{
+        height: 100%;
+        padding-top: 24%;
+    }
+
+    .container{
+        flex-direction: column-reverse;
+        margin-left: 2%;
+    }
+
+    main{
+        text-align: center;
+        padding-left: 0%;
+        padding-right: 0%;
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+
+    .info-devivery img{
+        width: 50%;
+    }
+
+    .phone-delivery img{
+        width: 1.5rem;
+    }
+
+    .phone-delivery{
+    align-items: flex-start;
+    }
+
+    .buttom-cards{
+        flex-direction: column;
+    }
+
+    .info-devivery{
+        flex-direction: column;
+    }
+
+    .text-delivery{
+        width: 100%;
+        font-size: 18px;
+        padding: 2%;
+    }
+
+    .pre-slots{
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .pre-slot{
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        font-size: 18px;
+        padding: 5%;
+    }
+
+    .offer-booking{
+        padding-top: 24%;
+    }
+
+    .icon-offer p {
+        font-size: 16px;
+    }
+
+    .tc-contact{
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    .pre-news{
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .offer-about-us{
+        padding-top: 100px;
+    }
+
+    .impotant-person img{
+        width: 50%;
+    }
+
+    .about-us-tf h3{
+        font-size: 18px;
+    }
+
+    .about-us-first{
+        flex-direction: column;
+    }
+    .about-us-first img{
+        width: 15rem;
+    }
+
+    .about-us-first-text h3{
+        font-size: 20px;
+    }
+    .about-us-first-text p{
+        font-size: 16px;
+    }
+    
+    .contact{
+        flex-direction: column;
+    }
+
+    iframe{
+        width: 300px;
+        height: 300px;
+     }
+
+     .text-contact{
+        margin-left: 2%;
+        margin-right: 2%;
+     }
+
+    .text-contact p{
+        font-size: 19px;
+    }
+
+    .tc-media{
+        margin-left: 0;
+        justify-content: center;
+    }
+
+    .tc-c{
+        display: flex;
+        flex-direction: row;
+    }
+
+    .user-card{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .cart-cart{
+        flex-direction: column;
+    }
+
+    .cart-once{
+        width: 200%;
+    }
+
+    .total-sum {
+        width: 105%;
+    }
+
+    .red{
+        font-size: 20px;
+    }
+
+    .logo-burger{
+        padding: 1%;
+        width: 6rem;
+    }
+
+    .table-1, .table-2, .table-3{
+        width: 40px;
+        height: 40px;
+    }
+
+    .table-entrance{
+        width: 40px;
+        height: 200px;
+        top: 50px;
+    }
+
+    .room-layout{
+        font-size: 12px;
+    }
+
+    .chear-1, .chear-2, .chear-3{
+        width: 40%;
+    }
+
+    .c3-1{
+        top: 8%;
+    }
+    .c3-2{
+        top: 31%;
+    }
+    .c3-3{
+        top: 55%;
+    }
+    .c3-4{
+        top: 78%;
+    }
+
+    .dobavlenie {
+        display: flex;
+        justify-content: space-around;
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* страница меню */
+    /* Адаптивность для стрелочек */
+    @media (max-width: 768px) {
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 40px;
+            height: 40px;
+        }
+
+        .carousel-control-prev {
+            left: -15px;
+        }
+
+        .carousel-control-next {
+            right: -15px;
+        }
+    }
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .col-md-3 {
+                flex: 0 0 50%;
+                max-width: 50%;
+            }
+        }
+    
+        @media (max-width: 576px) {
+            .col-md-3 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            h2{
+                font-size: 25px;
+            }
+
+            .icon-offer p {
+                font-size: 14px;
+            }
+        
+            .icon-offer img {
+                width: 2rem;
+            }
+        }

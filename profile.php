@@ -261,35 +261,39 @@ try {
             ?>
         </div>
     </div>
-    <!-- Кнопка для открытия формы -->
-    <button id="openReviewForm" class="btn btn-primary">Написать отзыв</button>
 
-    <!-- Скрытый div с формой -->
-    <div id="reviewFormContainer" style="display: none; margin-top: 20px;">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Оставить отзыв</h5>
-                <form id="reviewForm" method="POST">
-                    <div class="mb-3">
-                        <label for="reviewText" class="form-label">Ваш отзыв</label>
-                        <textarea class="form-control" id="reviewText" name="reviewText" rows="3" required></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label for="reviewRating" class="form-label">Оценка (1-5)</label>
-                        <select class="form-select" id="reviewRating" name="reviewRating" required>
-                            <option value="5">5 - Отлично</option>
-                            <option value="4">4 - Хорошо</option>
-                            <option value="3">3 - Удовлетворительно</option>
-                            <option value="2">2 - Плохо</option>
-                            <option value="1">1 - Очень плохо</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-success">Отправить</button>
-                    <button type="button" id="cancelReview" class="btn btn-secondary">Отмена</button>
-                </form>
+    <div class="for-otziv">
+        <!-- Кнопка для открытия формы -->
+        <button id="openReviewForm" class="btn btn-primary">Написать отзыв</button>
+
+        <!-- Скрытый div с формой -->
+        <div id="reviewFormContainer" style="display: none; margin-top: 20px;">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Оставить отзыв</h5>
+                    <form id="reviewForm" method="POST">
+                        <div class="mb-3">
+                            <label for="reviewText" class="form-label">Ваш отзыв</label>
+                            <textarea class="form-control" id="reviewText" name="reviewText" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="reviewRating" class="form-label">Оценка (1-5)</label>
+                            <select class="form-select" id="reviewRating" name="reviewRating" required>
+                                <option value="5">5 - Отлично</option>
+                                <option value="4">4 - Хорошо</option>
+                                <option value="3">3 - Удовлетворительно</option>
+                                <option value="2">2 - Плохо</option>
+                                <option value="1">1 - Очень плохо</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success">Отправить</button>
+                        <button type="button" id="cancelReview" class="btn btn-secondary">Отмена</button>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
+
 </main>
 
 <?php include 'components/footer.php'; ?>

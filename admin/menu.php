@@ -182,7 +182,235 @@ foreach ($allVariants as $variant) {
 }
 ?>
 
+<style>
+    .non-stop{
+        gap: 15px;
+        display: flex;
+        flex-direction: column;
+    }
+    /* Основные стили */
+    .admin-menu {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin: 2rem 12% 3rem;
+    }
+
+    /* Кнопка "Назад" */
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        color: #c0875c;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .back-link:hover {
+        color: #a57352;
+        text-decoration: underline;
+    }
+
+    /* Заголовки */
+    h2, h4 {
+        color: #24211C;
+        margin-bottom: 1.5rem;
+        border-bottom: 2px solid #c0875c;
+        padding-bottom: 0.5rem;
+    }
+
+    h2 {
+        font-size: 1.75rem;
+    }
+
+    h4 {
+        font-size: 1.25rem;
+    }
+
+    /* Уведомления */
+    .alert {
+        padding: 1rem;
+        border-radius: 8px;
+        margin-bottom: 1.5rem;
+    }
+    
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-left: 4px solid #dc3545;
+    }
+    
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border-left: 4px solid #28a745;
+    }
+
+    /* Шапка с кнопкой */
+    .menu-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    /* Таблица */
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+    }
+    
+    .table th {
+        background-color: #c0875c;
+        color: white;
+        padding: 1rem;
+        text-align: left;
+    }
+    
+    .table td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        vertical-align: middle;
+    }
+    
+    .table tr:hover {
+        background-color: #f9f9f9;
+    }
+    
+    .table img {
+        max-width: 50px;
+        border-radius: 4px;
+    }
+
+    /* Форма */
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #24211C;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+    }
+    
+    .form-control:focus {
+        border-color: #c0875c;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(192, 135, 92, 0.2);
+    }
+    
+    textarea.form-control {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .img-thumbnail {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 0.25rem;
+        background-color: white;
+        max-width: 200px;
+    }
+
+    /* Блоки вариантов */
+    .drink-variant, .new-variant {
+        margin-bottom: 1rem;
+        padding: 1rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #f9f9f9;
+    }
+
+    /* Кнопки */
+    .btn {
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-primary {
+        background-color: #c0875c;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background-color: #a57352;
+    }
+    
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+    
+    .btn-warning {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    
+    .btn-danger {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-sm {
+        padding: 0.25rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .admin-menu {
+            margin: 1rem;
+            padding: 1rem;
+        }
+        
+        .menu-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+        
+        .table th, .table td {
+            padding: 0.75rem 0.5rem;
+        }
+        
+        .drink-variant .row, .new-variant .row {
+            flex-direction: column;
+        }
+        
+        .drink-variant .col-md-3, 
+        .drink-variant .col-md-2,
+        .new-variant .col-md-5 {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
 <div class="admin-menu">
+    <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
+    
     <?php if (isset($error)): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
     <?php endif; ?>
@@ -198,13 +426,13 @@ foreach ($allVariants as $variant) {
     <?php endif; ?>
     
     <?php if ($action === 'list' || $action === 'delete'): ?>
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="menu-header">
             <h2>Управление меню</h2>
             <a href="menu.php?page=menu&action=add" class="btn btn-primary">Добавить позицию</a>
         </div>
         
         <div class="table-responsive">
-            <table class="table table-striped">
+            <table class="table">
                 <thead>
                     <tr>
                         <th>ID</th>
@@ -229,7 +457,7 @@ foreach ($allVariants as $variant) {
                             </td>
                             <td>
                                 <?php if (!empty($item['image'])): ?>
-                                    <img src="../<?= htmlspecialchars($item['image']) ?>" style="max-width: 50px;">
+                                    <img src="../<?= htmlspecialchars($item['image']) ?>" class="img-thumbnail">
                                 <?php endif; ?>
                             </td>
                             <td><?= htmlspecialchars($item['title']) ?></td>
@@ -246,8 +474,10 @@ foreach ($allVariants as $variant) {
                                 <?php endif; ?>
                             </td>
                             <td>
-                                <a href="menu.php?page=menu&action=edit&id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">Редактировать</a>
-                                <a href="menu.php?page=menu&action=delete&id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Удалить эту позицию?')">Удалить</a>
+                                <div class="d-flex gap-2 non-stop">
+                                    <a href="menu.php?page=menu&action=edit&id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">Редактировать</a>
+                                    <a href="menu.php?page=menu&action=delete&id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Удалить эту позицию?')">Удалить</a>
+                                </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -263,9 +493,9 @@ foreach ($allVariants as $variant) {
             
             <?php if (isset($item['image']) && !empty($item['image'])): ?>
                 <input type="hidden" name="existing_image" value="<?= htmlspecialchars($item['image']) ?>">
-                <div class="mb-3">
+                <div class="form-group mb-3">
                     <label>Текущее изображение:</label>
-                    <img src="../<?= htmlspecialchars($item['image']) ?>" class="img-thumbnail" style="max-width: 200px; display: block;">
+                    <img src="../<?= htmlspecialchars($item['image']) ?>" class="img-thumbnail">
                 </div>
             <?php endif; ?>
             
@@ -316,7 +546,7 @@ foreach ($allVariants as $variant) {
                 <div id="drinks-container">
                     <?php if (($item['category'] ?? '') === 'drinks' && !empty($item['drinks'])): ?>
                         <?php foreach ($item['drinks'] as $drink): ?>
-                            <div class="drink-variant mb-3 p-3 border rounded">
+                            <div class="drink-variant">
                                 <div class="row">
                                     <div class="col-md-3">
                                         <label>Тип напитка</label>
@@ -351,7 +581,7 @@ foreach ($allVariants as $variant) {
                             </div>
                         <?php endforeach; ?>
                     <?php elseif (($item['category'] ?? '') === 'drinks'): ?>
-                        <div class="drink-variant mb-3 p-3 border rounded">
+                        <div class="drink-variant">
                             <div class="row">
                                 <div class="col-md-3">
                                     <label>Тип напитка</label>
@@ -393,7 +623,7 @@ foreach ($allVariants as $variant) {
                 <div id="new-variants-container">
                     <?php if (($item['category'] ?? '') === 'new' && !empty($item['variants'])): ?>
                         <?php foreach ($item['variants'] as $variant): ?>
-                            <div class="new-variant mb-3 p-3 border rounded">
+                            <div class="new-variant">
                                 <div class="row">
                                     <div class="col-md-5">
                                         <label>Название варианта</label>
@@ -412,7 +642,7 @@ foreach ($allVariants as $variant) {
                             </div>
                         <?php endforeach; ?>
                     <?php elseif (($item['category'] ?? '') === 'new'): ?>
-                        <div class="new-variant mb-3 p-3 border rounded">
+                        <div class="new-variant">
                             <div class="row">
                                 <div class="col-md-5">
                                     <label>Название варианта</label>
@@ -433,7 +663,7 @@ foreach ($allVariants as $variant) {
                 <button type="button" id="add-new-variant" class="btn btn-secondary">Добавить вариант</button>
             </div>
             
-            <div class="form-group">
+            <div class="form-group d-flex gap-2">
                 <button type="submit" class="btn btn-primary">Сохранить</button>
                 <a href="menu.php?page=menu" class="btn btn-secondary">Отмена</a>
             </div>

@@ -40,7 +40,7 @@ require_once '../components/db_connect.php';
             <h2>Кофе с СоВой</h2>
             <div class="icons-for-offer">
                 <div class="icon-offer-2 hidden ">
-                    <img src="../img/coffee-table.png" alt="">
+                    <img src="../img/about-us/coffee-table.png" alt="">
                 </div>
             </div>
             <div class="about-us-tf">
@@ -55,7 +55,7 @@ require_once '../components/db_connect.php';
     <main>
         <div id="tooltip" class="tooltip">Номер скопирован!</div>
         <div class="about-us-first">
-            <img src="../img/about-us.png" alt="">
+            <img src="../img/about-us/about-us.png" alt="">
             <div class="about-us-first-text garmond-0">
                 <h3>"Кофе с Совой" — это не только про кофе</h3>
                 <p>Это про теплые встречи, душевные разговоры и моменты, которые хочется сохранить в памяти. Мы гордимся
@@ -80,13 +80,13 @@ require_once '../components/db_connect.php';
                         нами любым удобным для вас способом.</p>
                     <div class="tc-contacts">
                         <div class="tc-media">
-                            <img src="../img/phone-deliver.png" alt="">
+                            <img src="../img/about-us/phone-deliver.png" alt="">
                             <div class="text-to-copy" onclick="copyText(this)">
                                 <p>8911 509 00 35</p>
                             </div>
                         </div>
                         <div class="tc-media">
-                            <img src="../img/location-dark.png" alt="">
+                            <img src="../img/about-us/location-dark.png" alt="">
                             <p>г. Вытегра, ул. Вянгинская, 29</p>
                         </div>
                     </div>
@@ -122,14 +122,14 @@ require_once '../components/db_connect.php';
             <h2 class="text-center mb-4">Наши создатели:</h2>
             <div class="about-impotant-persons">
                 <div class="impotant-person card">
-                    <img src="../img/person-1.png" alt="">
+                    <img src="../img/about-us/person-1.png" alt="">
                     <div class="text-person">
                         <p class="garmond-1">Фокина Марина</p>
                         <span>Руководитель Кофейни</span>
                     </div>
                 </div>
                 <div class="impotant-person card">
-                    <img src="../img/person-2.png" alt="">
+                    <img src="../img/about-us/person-2.png" alt="">
                     <div class="text-person">
                         <p class="garmond-1">Александр Филькин</p>
                         <span>Руководитель Пекарни</span>

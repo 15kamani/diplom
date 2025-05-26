@@ -56,8 +56,8 @@ $events = $pdo->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll
 ?>
 
 <div class="admin-container">
-    <a href="../admin.php">Назад</a>
-    <h2>Управление событиями</h2>
+    <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
+    <h2 style="color: var(--dark); margin-bottom: 1.5rem;">Управление событиями</h2>
     
     <!-- Форма добавления нового события -->
     <div class="event-form">
@@ -95,7 +95,7 @@ $events = $pdo->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll
                 </div>
             </div>
             
-            <button type="submit" class="btn">Сохранить событие</button>
+            <button type="submit" class="btn-admin">Сохранить событие</button>
         </form>
     </div>
     
@@ -148,119 +148,225 @@ $events = $pdo->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll
 </div>
 
 <style>
-.admin-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-.event-form, .events-list {
-    background: #f9f9f9;
-    padding: 20px;
-    margin-bottom: 30px;
-    border-radius: 5px;
-}
-
-.form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-}
-
-.form-group input[type="text"],
-.form-group input[type="url"],
-.form-group textarea {
-    width: 100%;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.form-group textarea {
-    min-height: 100px;
-}
-
-.image-uploads {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-}
-
-.btn {
-    background: #4CAF50;
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.btn:hover {
-    background: #45a049;
-}
-
-.events-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-    gap: 20px;
-}
-
-.event-card {
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 5px;
-    background: white;
-}
-
-.event-images {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 10px;
-}
-
-.event-images img {
-    width: 100%;
-    height: auto;
-    border-radius: 3px;
-}
-
-.event-short-description {
-    margin: 10px 0;
-    line-height: 1.5;
-}
-
-.event-detailed-description ul {
-    padding-left: 20px;
-    margin: 10px 0;
-}
-
-.event-link {
-    display: inline-block;
-    margin-top: 10px;
-    color: #2196F3;
-    text-decoration: none;
-}
-
-.event-link:hover {
-    text-decoration: underline;
-}
-
-.btn-delete {
-    background: #f44336;
-    color: white;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 3px;
-    cursor: pointer;
-    margin-top: 10px;
-}
-
-.btn-delete:hover {
-    background: #d32f2f;
-}
+    html{
+        background-color: #f7eabd;
+    }
+    /* Основные стили из админ-панели */
+    .admin-container {
+        background-color: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        padding: 2rem;
+        margin-top: 2rem;
+        margin-bottom: 3rem;
+        margin-left: 12%;
+        margin-right: 12%;
+    }
+    
+    .btn-admin {
+        background-color: var(--accent);
+        border: none;
+        color: white;
+        padding: 0.5rem 1.5rem;
+        border-radius: 8px;
+        transition: all 0.3s;
+    }
+    
+    .btn-admin:hover {
+        background-color: #a57352;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .btn-logout {
+        background-color: #dc3545;
+        color: white;
+    }
+    
+    .btn-logout:hover {
+        background-color: #bb2d3b;
+    }
+    
+    /* Специфичные стили для страницы событий */
+    .event-form, .events-list {
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    }
+    
+    .event-form h3, .events-list h3 {
+        color: var(--accent);
+        border-left: 4px solid var(--accent);
+        padding-left: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--dark);
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="url"],
+    .form-group textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border 0.3s;
+    }
+    
+    .form-group input[type="text"]:focus,
+    .form-group input[type="url"]:focus,
+    .form-group textarea:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(192, 135, 92, 0.2);
+    }
+    
+    .form-group textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+    
+    .form-group small {
+        display: block;
+        margin-top: 0.5rem;
+        color: #6c757d;
+        font-size: 0.85rem;
+    }
+    
+    .image-uploads {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .image-uploads input[type="file"] {
+        padding: 0.5rem;
+        background: #f1f1f1;
+        border-radius: 8px;
+    }
+    
+    .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .event-card {
+        background: white;
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        transition: transform 0.3s;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .event-images {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .event-images img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+    }
+    
+    .event-card h4 {
+        color: var(--dark);
+        margin-bottom: 0.75rem;
+        font-size: 1.25rem;
+    }
+    
+    .event-short-description {
+        color: #555;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+    }
+    
+    .event-detailed-description ul {
+        padding-left: 1.5rem;
+        margin-bottom: 1rem;
+    }
+    
+    .event-detailed-description li {
+        margin-bottom: 0.5rem;
+        color: #555;
+    }
+    
+    .event-link {
+        display: inline-block;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        transition: color 0.3s;
+    }
+    
+    .event-link:hover {
+        color: #a57352;
+        text-decoration: underline;
+    }
+    
+    .btn-delete {
+        background-color: #dc3545;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    .btn-delete:hover {
+        background-color: #bb2d3b;
+    }
+    
+    /* Кнопка "Назад" */
+    .back-link {
+        display: inline-block;
+        margin-bottom: 1.5rem;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
+    
+    .back-link:hover {
+        color: #a57352;
+        text-decoration: underline;
+    }
+    
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .admin-container {
+            padding: 1rem;
+        }
+        
+        .image-uploads {
+            grid-template-columns: 1fr;
+        }
+        
+        .events-grid {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>

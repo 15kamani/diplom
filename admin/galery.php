@@ -80,34 +80,189 @@ $items = $pdo->query("SELECT * FROM media_content ORDER BY created_at DESC")->fe
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ-панель галереи</title>
     <style>
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        .form-group { margin-bottom: 15px; }
-        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-top: 30px; }
-        .gallery-item { border: 1px solid #ddd; padding: 10px; position: relative; }
-        .gallery-item img { max-width: 100%; height: auto; display: block; }
-        .gallery-item .delete-btn { 
-            position: absolute; 
-            top: 5px; 
-            right: 5px; 
-            background: red; 
-            color: white; 
-            border: none; 
-            border-radius: 50%; 
-            width: 25px; 
-            height: 25px; 
-            cursor: pointer;
+        :root {
+            --dark: #24211C;
+            --accent: #c0875c;
+            --light: #f7eabd;
         }
-        .error { color: red; margin: 10px 0; }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-gallery {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            padding: 2rem;
+            margin: 2rem 12% 3rem;
+        }
+        
+        h1, h2 {
+            color: var(--dark);
+            border-bottom: 2px solid var(--accent);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        h1 {
+            font-size: 2rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+        
+        /* Кнопка "Назад" */
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .back-link:hover {
+            color: #a57352;
+            text-decoration: underline;
+        }
+        
+        /* Форма */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        input[type="file"],
+        textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        /* Кнопки */
+        .btn {
+            padding: 0.5rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .btn:hover {
+            background-color: #a57352;
+        }
+        
+        /* Галерея */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .gallery-item {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            padding: 1rem;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: relative;
+            transition: transform 0.2s;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .gallery-item img {
+            max-width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        
+        .gallery-item p {
+            margin: 0.5rem 0;
+            color: var(--dark);
+        }
+        
+        /* Кнопка удаления */
+        .delete-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-btn:hover {
+            background-color: #bb2d3b;
+        }
+        
+        /* Сообщения об ошибках */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left: 4px solid #dc3545;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .admin-gallery {
+                margin: 1rem;
+                padding: 1rem;
+            }
+            
+            .gallery {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="admin-gallery">
+        <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
         <h1>Админ-панель галереи</h1>
         
         <!-- Форма добавления -->
         <h2>Добавить новое изображение</h2>
         <?php if (isset($error)): ?>
-            <div class="error"><?= htmlspecialchars($error) ?></div>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
         <?php endif; ?>
         
         <form method="post" enctype="multipart/form-data">
@@ -117,9 +272,9 @@ $items = $pdo->query("SELECT * FROM media_content ORDER BY created_at DESC")->fe
             </div>
             <div class="form-group">
                 <label for="caption">Подпись:</label>
-                <textarea name="caption" id="caption" rows="3" style="width: 100%;"></textarea>
+                <textarea name="caption" id="caption" rows="3"></textarea>
             </div>
-            <button type="submit">Загрузить</button>
+            <button type="submit" class="btn">Загрузить</button>
         </form>
 
         <!-- Список существующих записей -->
@@ -133,7 +288,6 @@ $items = $pdo->query("SELECT * FROM media_content ORDER BY created_at DESC")->fe
                         <button class="delete-btn" onclick="if(confirm('Удалить эту запись?')) window.location.href='?delete=<?= $item['id'] ?>'">×</button>
                         <img src="<?= htmlspecialchars($item['image_path']) ?>" alt="<?= htmlspecialchars($item['caption']) ?>">
                         <p><?= htmlspecialchars($item['caption']) ?></p>
-                        <!-- <small>Добавлено: <?= $item['created_at'] ?></small> -->
                     </div>
                 <?php endforeach; ?>
             </div>

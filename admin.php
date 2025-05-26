@@ -15,6 +15,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Админ-панель</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="icon" href="img/favicon.png" type="image/x-icon">
     <style>
         :root {
             --dark: #24211C;
@@ -41,6 +42,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
             border-bottom: 2px solid var(--accent);
             padding-bottom: 1rem;
             margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-around;
         }
         
         .admin-title {
@@ -96,6 +99,32 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
             display: none;
         }
         
+        .admin-veber{
+            display: flex;
+            justify-content: space-evenly;
+        }
+
+        .btn-custom {
+    background-color: #c0875c;
+    /* Основной цвет */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    color: #ffffff;
+    /* Цвет текста (темный для контраста) */
+    font-size: 18px;
+    padding: 1%;
+    border-radius: 10px;
+    text-decoration: none;
+}
+
+.btn-custom:hover {
+    background-color: #702f27;
+    /* Цвет при наведении (немного темнее) */
+    border-color: #c0875c;
+    /* Цвет границы при наведении */
+    color: #e0d4a8;
+    /* Цвет текста при наведении */
+}
+
         /* Адаптивность */
         @media (max-width: 768px) {
             .admin-container {
@@ -108,16 +137,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
     
     <div class="container admin-container">
         <div class="admin-header">
-            <h1 class="admin-title">Административная панель</h1>
-            <p class="admin-welcome">Добро пожаловать, <strong><?= htmlspecialchars($_SESSION['username']) ?></strong></p>
-            <p class="text-muted">Управление контентом и настройками сайта</p>
-            <a href="logout.php" class="btn btn-logout">Выйти из системы</a>
+            <div class="info-header">
+                <h1 class="admin-title">Административная панель</h1>
+                <p class="admin-welcome">Добро пожаловать, <strong><?= htmlspecialchars($_SESSION['username']) ?></strong></p>
+                <p class="text-muted">Управление контентом и настройками сайта</p>
+                <a href="logout.php" class="btn btn-logout">Выйти из системы</a>
+            </div>
+            <div class="logo-header">
+                <img src="img/header/logo.jpg" alt="" style="border-radius: 40%;">
+            </div>
         </div>
-        
-        <a href="admin/event.php">Ивент</a>
-        <a href="admin/news.php">блог</a>
-        <a href="admin/menu.php">МЕНЮ</a>
-        <a href="admin/galery.php">ГАЛЕРЕЯ</a>
+        <div class="admin-veber">
+            <a href="admin/event.php" class="btn-custom">ИВЕНТ</a>
+            <a href="admin/news.php" class="btn-custom">БЛОГ</a>
+            <a href="admin/menu.php" class="btn-custom">МЕНЮ</a>
+            <a href="admin/galery.php" class="btn-custom">ГАЛЕРЕЯ</a>
+            <a href="admin/review.php" class="btn-custom">ОТЗЫВЫ</a>
+        </div>
 
 
     </div>

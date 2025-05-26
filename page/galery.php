@@ -2,11 +2,6 @@
 session_start();
 require_once '../components/db_connect.php';
 
-// Проверка авторизации
-if (!isset($_SESSION['user_id'])) {
-    header("Location: ../index.php");
-    exit();
-}
 // Получаем данные из базы
 $items = $pdo->query("SELECT * FROM media_content ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
