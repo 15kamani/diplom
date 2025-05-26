@@ -686,12 +686,11 @@ footer a:hover {
 }
 
 .table {
-    position: absolute;
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: auto;
     background-color: #8b5e3c;
     color: white;
-    display: flex;
+    /* display: flex; */
     align-items: center;
     justify-content: center;
     text-align: center;

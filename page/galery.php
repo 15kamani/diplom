@@ -7,7 +7,8 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: ../index.php");
     exit();
 }
-
+// Получаем данные из базы
+$items = $pdo->query("SELECT * FROM media_content ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 
@@ -39,9 +40,44 @@ if (!isset($_SESSION['user_id'])) {
             include "../modal/register-for-page.php";
         ?>
 
-    <?php
-        include "../components-page/footer.php";
-    ?>
+        <main style="
+    padding-top: 14%;
+    padding-bottom: 2%;
+">
+            <div id="tooltip" class="tooltip">Номер скопирован!</div>
+            <div class="gallery">
+                <div class="kroshka">
+                    <p><a href="../index.php">Главная</a> > <a href="#">Галерея</a></p>
+                </div>
+                <h1 class="text-center mb-4">Галерея</h1>
+                
+                <?php if (!empty($items)): ?>
+                    <div class="row gallery-grid container-gallery">
+                        <?php foreach ($items as $item): ?>
+                            <div class="col-md-4 col-sm-6 mb-5">
+                                <div class="gallery-item">
+                                    <img src="<?= htmlspecialchars($item['image_path']) ?>" alt="<?= htmlspecialchars($item['caption']) ?>" class="img-fluid">
+                                    <div class="gallery-overlay">
+                                        <p class="gallery-text"><?= htmlspecialchars($item['caption']) ?></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php else: ?>
+                    <div class="alert alert-info">В галерее пока нет изображений</div>
+                <?php endif; ?>
+                
+                <div class="text-off-gallery">
+                    <h2>Ещё больше красивых фотографий ты сможешь увидеть в группе ВК:</h2>
+                    <a href="https://vk.com/albums-169204320"><button class="btn btn-custom">Увидеть больше ></button></a>
+                </div>
+            </div>
+        </main>
+
+        <?php
+            include "../components-page/footer.php";
+        ?>
 
         <!-- Подключите Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>

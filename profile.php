@@ -83,6 +83,58 @@ try {
         padding: 5px;
     }
 }
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 0.75rem;
+    vertical-align: middle;
+    border-top: 1px solid #dee2e6;
+    text-align: left;
+}
+
+.table thead th {
+    vertical-align: bottom;
+    border-bottom: 2px solid #dee2e6;
+    background-color: #8b5e3c;
+    color: white;
+}
+
+.table tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}
+
+.table img {
+    vertical-align: middle;
+}
+
+.quantity-input {
+    display: inline-block;
+    width: 70px;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.2rem;
+}
     </style>
 </head>
 <body class="container-0">
@@ -168,7 +220,7 @@ try {
                         <tr>
                             <td>
                                 <?php if ($item['image']): ?>
-                                    <img src="../<?= htmlspecialchars($item['image']) ?>" width="50" class="me-2">
+                                    <img src="<?= htmlspecialchars($item['image']) ?>" width="50" class="me-2">
                                 <?php endif; ?>
                                 <?= htmlspecialchars($item['title']) ?>
                             </td>
