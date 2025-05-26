@@ -74,12 +74,12 @@
                             Бронирование
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownBooking1">
-                            <a class="dropdown-item" href="../page/booking.php">Забронировать столик</a>
-                            <a class="dropdown-item" href="../page/booking.php#hall_reservation">Заказать зал</a>
+                            <a class="dropdown-item" href="booking.php">Забронировать столик</a>
+                            <a class="dropdown-item" href="booking.php#hall_reservation">Заказать зал</a>
                         </div>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="page/news.php">Новости</a>
+                        <a class="nav-link" href="news.php">Новости</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="../page/galery.php">Галерея</a>
@@ -146,32 +146,32 @@
                     <?php endif; ?>
                     
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="page/menu.php" id="navbarDropdown"
+                        <a class="nav-link dropdown-toggle" href="menu.php" id="navbarDropdown"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Меню
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <a class="dropdown-item" href="../page/menu.php#novinki1">Новинки</a>
-                            <a class="dropdown-item" href="../page/menu.php#drinks1">Напитки</a>
-                            <a class="dropdown-item" href="../page/menu.php#bistro1">Бистро/Пекарня</a>
-                            <a class="dropdown-item" href="../page/menu.php#presents1">Подарочные наборы</a>
+                            <a class="dropdown-item" href="menu.php#novinki1">Новинки</a>
+                            <a class="dropdown-item" href="menu.php#drinks1">Напитки</a>
+                            <a class="dropdown-item" href="menu.php#bistro1">Бистро/Пекарня</a>
+                            <a class="dropdown-item" href="menu.php#presents1">Подарочные наборы</a>
                         </div>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="delivery.php#deliver">Доставка</a>
                     </li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="../page/booking.php" id="navbarDropdownBooking"
+                        <a class="nav-link dropdown-toggle" href="booking.php" id="navbarDropdownBooking"
                             role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Бронирование
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownBooking">
-                            <a class="dropdown-item" href="../page/booking.php">Забронировать столик</a>
-                            <a class="dropdown-item" href="../page/booking.php#hall_reservation">Заказать зал</a>
+                            <a class="dropdown-item" href="booking.php">Забронировать столик</a>
+                            <a class="dropdown-item" href="booking.php#hall_reservation">Заказать зал</a>
                         </div>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="page/news.php">Новости</a>
+                        <a class="nav-link" href="news.php">Новости</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="../page/galery.php">Галерея</a>

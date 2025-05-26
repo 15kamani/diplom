@@ -75,8 +75,8 @@
                             Бронирование
                         </a>
                         <div class="dropdown-menu" aria-labelledby="navbarDropdownBooking1">
-                            <a class="dropdown-item" href="../page/booking.php">Забронировать столик</a>
-                            <a class="dropdown-item" href="../page/booking.php#hall_reservation">Заказать зал</a>
+                            <a class="dropdown-item" href="page/booking.php">Забронировать столик</a>
+                            <a class="dropdown-item" href="page/booking.php#hall_reservation">Заказать зал</a>
                         </div>
                     </li>
                     <li class="nav-item active">

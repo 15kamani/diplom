@@ -657,14 +657,14 @@ footer a:hover {
 
 /* страница бронирования*/
 .offer-booking {
-    background-image: url(../img/offer-booking.png);
+    background-image: url(../img/booking/offer-booking.png);
     background-repeat: no-repeat;
     width: 100%;
     height: 100%;
     object-fit: fill;
     background-size: cover;
     color: #f6f6f5;
-    padding-top: 200px;
+    padding-top: 150px;
 }
 
 .offer-booking h2 {
@@ -1481,4 +1481,24 @@ iframe {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
+}
+
+
+.table.booked {
+    background-color: #ffcccc;
+    border: 2px solid #ff0000;
+    cursor: not-allowed;
+}
+
+.table.booked::after {
+    content: "Занят";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(255, 0, 0, 0.8);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
 }
