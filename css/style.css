@@ -1501,3 +1501,8 @@ iframe {
     border-radius: 5px;
     font-weight: bold;
 }
+
+.for-otziv{
+    display: flex;
+    align-items: flex-end;
+}

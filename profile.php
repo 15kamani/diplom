@@ -250,7 +250,7 @@ try {
             
             <div class="text-end mt-3">
                 <h4>Итого: <?= $total ?> руб.</h4>
-                <button class="btn btn-primary checkout-btn">Оформить заказ</button>
+                <button class="btn btn-custom checkout-btn">Оформить заказ</button>
             </div>
             
             <?php 
@@ -262,37 +262,48 @@ try {
         </div>
     </div>
 
-    <div class="for-otziv">
-        <!-- Кнопка для открытия формы -->
-        <button id="openReviewForm" class="btn btn-primary">Написать отзыв</button>
+<div class="for-otziv card">
+    <!-- Текст с просьбой оставить отзыв -->
+    <div class="review-invitation mb-4">
+        <p class="lead text-muted" style="font-size: 1.5rem; line-height: 1.6;">
+            Нам очень важно ваше мнение! Поделитесь, пожалуйста, своими впечатлениями — 
+            это поможет нам становиться лучше и мотивирует нашу команду. 
+            Спасибо, что находите время для обратной связи!
+        </p>
+    </div>
 
-        <!-- Скрытый div с формой -->
-        <div id="reviewFormContainer" style="display: none; margin-top: 20px;">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Оставить отзыв</h5>
-                    <form id="reviewForm" method="POST">
-                        <div class="mb-3">
-                            <label for="reviewText" class="form-label">Ваш отзыв</label>
-                            <textarea class="form-control" id="reviewText" name="reviewText" rows="3" required></textarea>
-                        </div>
-                        <div class="mb-3">
-                            <label for="reviewRating" class="form-label">Оценка (1-5)</label>
-                            <select class="form-select" id="reviewRating" name="reviewRating" required>
-                                <option value="5">5 - Отлично</option>
-                                <option value="4">4 - Хорошо</option>
-                                <option value="3">3 - Удовлетворительно</option>
-                                <option value="2">2 - Плохо</option>
-                                <option value="1">1 - Очень плохо</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-success">Отправить</button>
-                        <button type="button" id="cancelReview" class="btn btn-secondary">Отмена</button>
-                    </form>
-                </div>
+    <!-- Кнопка для открытия формы -->
+    <button id="openReviewForm" class="btn btn-custom" style="font-size: 16px;">Написать отзыв</button>
+
+    <!-- Скрытый div с формой -->
+    <div id="reviewFormContainer" style="display: none; margin-top: 20px;">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Оставить отзыв</h5>
+                <form id="reviewForm" method="POST">
+                    <div class="mb-3">
+                        <label for="reviewText" class="form-label">Ваш отзыв</label>
+                        <textarea class="form-control" id="reviewText" name="reviewText" rows="3" required 
+                                  placeholder="Напишите здесь ваши впечатления..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reviewRating" class="form-label">Оценка (1-5)</label>
+                        <select class="form-select" id="reviewRating" name="reviewRating" required>
+                            <option value="" selected disabled>Выберите оценку</option>
+                            <option value="5">5 - Отлично</option>
+                            <option value="4">4 - Хорошо</option>
+                            <option value="3">3 - Удовлетворительно</option>
+                            <option value="2">2 - Плохо</option>
+                            <option value="1">1 - Очень плохо</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success">Отправить отзыв</button>
+                    <button type="button" id="cancelReview" class="btn btn-outline-secondary">Отмена</button>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
 </main>
 
