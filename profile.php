@@ -175,92 +175,121 @@ try {
             </div>
         </div>
     </div>
-<!-- Секция корзины -->
-<div class="cart-section mt-5">
-    <h2>Ваша корзина</h2>
-    <div id="cart-items">
-        <?php
-        $cartItems = [];
-        $total = 0;
-        
-        try {
-            if (isset($_SESSION['user_id'])) {
-                $stmt = $pdo->prepare("
-                    SELECT c.*, m.title, m.image 
-                    FROM cart c
-                    JOIN menu_items m ON c.menu_item_id = m.id
-                    WHERE c.user_id = ?
-                ");
-                $stmt->execute([$_SESSION['user_id']]);
-                $cartItems = $stmt->fetchAll();
-            }
+    <!-- Секция корзины -->
+    <div class="cart-section mt-5">
+        <h2>Ваша корзина</h2>
+        <div id="cart-items">
+            <?php
+            $cartItems = [];
+            $total = 0;
             
-            if (empty($cartItems)) {
-                echo '<p>Ваша корзина пуста</p>';
-            } else {
-        ?>
-        
-        <div class="table-responsive">
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Товар</th>
-                        <th>Вариант</th>
-                        <th>Цена</th>
-                        <th>Кол-во</th>
-                        <th>Сумма</th>
-                        <th>Действия</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($cartItems as $item): 
-                        $itemSum = $item['price'] * $item['quantity'];
-                        $total += $itemSum;
-                    ?>
+            try {
+                if (isset($_SESSION['user_id'])) {
+                    $stmt = $pdo->prepare("
+                        SELECT c.*, m.title, m.image 
+                        FROM cart c
+                        JOIN menu_items m ON c.menu_item_id = m.id
+                        WHERE c.user_id = ?
+                    ");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $cartItems = $stmt->fetchAll();
+                }
+                
+                if (empty($cartItems)) {
+                    echo '<p>Ваша корзина пуста</p>';
+                } else {
+            ?>
+            
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>
-                                <?php if ($item['image']): ?>
-                                    <img src="<?= htmlspecialchars($item['image']) ?>" width="50" class="me-2">
-                                <?php endif; ?>
-                                <?= htmlspecialchars($item['title']) ?>
-                            </td>
-                            <td><?= $item['variant_name'] ? htmlspecialchars($item['variant_name']) : '-' ?></td>
-                            <td><?= htmlspecialchars($item['price']) ?> руб.</td>
-                            <td>
-                                <input type="number" 
-                                       class="form-control quantity-input" 
-                                       value="<?= htmlspecialchars($item['quantity']) ?>" 
-                                       min="1" max="100"
-                                       data-cart-id="<?= $item['id'] ?>"
-                                       data-old-value="<?= htmlspecialchars($item['quantity']) ?>"
-                                       style="width: 70px;">
-                            </td>
-                            <td><?= $itemSum ?> руб.</td>
-                            <td>
-                                <button class="btn btn-sm btn-danger remove-from-cart" 
-                                        data-cart-id="<?= $item['id'] ?>">
-                                    Удалить
-                                </button>
-                            </td>
+                            <th>Товар</th>
+                            <th>Вариант</th>
+                            <th>Цена</th>
+                            <th>Кол-во</th>
+                            <th>Сумма</th>
+                            <th>Действия</th>
                         </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($cartItems as $item): 
+                            $itemSum = $item['price'] * $item['quantity'];
+                            $total += $itemSum;
+                        ?>
+                            <tr>
+                                <td>
+                                    <?php if ($item['image']): ?>
+                                        <img src="<?= htmlspecialchars($item['image']) ?>" width="50" class="me-2">
+                                    <?php endif; ?>
+                                    <?= htmlspecialchars($item['title']) ?>
+                                </td>
+                                <td><?= $item['variant_name'] ? htmlspecialchars($item['variant_name']) : '-' ?></td>
+                                <td><?= htmlspecialchars($item['price']) ?> руб.</td>
+                                <td>
+                                    <input type="number" 
+                                        class="form-control quantity-input" 
+                                        value="<?= htmlspecialchars($item['quantity']) ?>" 
+                                        min="1" max="100"
+                                        data-cart-id="<?= $item['id'] ?>"
+                                        data-old-value="<?= htmlspecialchars($item['quantity']) ?>"
+                                        style="width: 70px;">
+                                </td>
+                                <td><?= $itemSum ?> руб.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger remove-from-cart" 
+                                            data-cart-id="<?= $item['id'] ?>">
+                                        Удалить
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="text-end mt-3">
+                <h4>Итого: <?= $total ?> руб.</h4>
+                <button class="btn btn-primary checkout-btn">Оформить заказ</button>
+            </div>
+            
+            <?php 
+                } // закрытие else
+            } catch (PDOException $e) {
+                echo '<div class="alert alert-danger">Ошибка при загрузке корзины: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            }
+            ?>
         </div>
-        
-        <div class="text-end mt-3">
-            <h4>Итого: <?= $total ?> руб.</h4>
-            <button class="btn btn-primary checkout-btn">Оформить заказ</button>
-        </div>
-        
-        <?php 
-            } // закрытие else
-        } catch (PDOException $e) {
-            echo '<div class="alert alert-danger">Ошибка при загрузке корзины: ' . htmlspecialchars($e->getMessage()) . '</div>';
-        }
-        ?>
     </div>
-</div>
+    <!-- Кнопка для открытия формы -->
+    <button id="openReviewForm" class="btn btn-primary">Написать отзыв</button>
+
+    <!-- Скрытый div с формой -->
+    <div id="reviewFormContainer" style="display: none; margin-top: 20px;">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Оставить отзыв</h5>
+                <form id="reviewForm" method="POST">
+                    <div class="mb-3">
+                        <label for="reviewText" class="form-label">Ваш отзыв</label>
+                        <textarea class="form-control" id="reviewText" name="reviewText" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="reviewRating" class="form-label">Оценка (1-5)</label>
+                        <select class="form-select" id="reviewRating" name="reviewRating" required>
+                            <option value="5">5 - Отлично</option>
+                            <option value="4">4 - Хорошо</option>
+                            <option value="3">3 - Удовлетворительно</option>
+                            <option value="2">2 - Плохо</option>
+                            <option value="1">1 - Очень плохо</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success">Отправить</button>
+                    <button type="button" id="cancelReview" class="btn btn-secondary">Отмена</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </main>
 
 <?php include 'components/footer.php'; ?>
@@ -410,6 +439,133 @@ function updateTotalSum() {
     // Обработчик оформления заказа
     document.querySelector('.checkout-btn')?.addEventListener('click', function() {
         alert('Функционал оформления заказа будет реализован позже');
+});
+
+
+document.addEventListener('DOMContentLoaded', function() {
+    const openBtn = document.getElementById('openReviewForm');
+    const formContainer = document.getElementById('reviewFormContainer');
+    const cancelBtn = document.getElementById('cancelReview');
+    
+    // Открытие формы
+    openBtn.addEventListener('click', function() {
+        formContainer.style.display = 'block';
+        openBtn.style.display = 'none';
+    });
+    
+    // Закрытие формы
+    cancelBtn.addEventListener('click', function() {
+        formContainer.style.display = 'none';
+        openBtn.style.display = 'block';
+        document.getElementById('reviewForm').reset();
+    });
+    
+    // Отправка формы через AJAX
+    document.getElementById('reviewForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        formData.append('action', 'submit_review');
+        
+        fetch('modal/handle_review.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Отзыв успешно отправлен!');
+                formContainer.style.display = 'none';
+                openBtn.style.display = 'block';
+                this.reset();
+                loadUserReviews(); // Обновляем список отзывов
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при отправке отзыва');
+        });
+    });
+    
+    // Функция для загрузки отзывов пользователя
+    function loadUserReviews() {
+        fetch('modal/handle_review.php?action=get_reviews')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const reviewsContainer = document.getElementById('userReviews');
+                reviewsContainer.innerHTML = '';
+                
+                if (data.reviews.length > 0) {
+                    const table = document.createElement('table');
+                    table.className = 'table table-striped';
+                    
+                    const thead = document.createElement('thead');
+                    thead.innerHTML = `
+                        <tr>
+                            <th>Дата</th>
+                            <th>Отзыв</th>
+                            <th>Оценка</th>
+                            <th>Действия</th>
+                        </tr>
+                    `;
+                    table.appendChild(thead);
+                    
+                    const tbody = document.createElement('tbody');
+                    data.reviews.forEach(review => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${new Date(review.created_at).toLocaleString()}</td>
+                            <td>${review.review_text}</td>
+                            <td>${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</td>
+                            <td><button class="btn btn-sm btn-danger delete-review" data-id="${review.id}">Удалить</button></td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    
+                    table.appendChild(tbody);
+                    reviewsContainer.appendChild(table);
+                    
+                    // Добавляем обработчики для кнопок удаления
+                    document.querySelectorAll('.delete-review').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            if (confirm('Вы уверены, что хотите удалить этот отзыв?')) {
+                                deleteReview(this.getAttribute('data-id'));
+                            }
+                        });
+                    });
+                } else {
+                    reviewsContainer.innerHTML = '<p>У вас пока нет отзывов.</p>';
+                }
+            }
+        });
+    }
+    
+    // Функция для удаления отзыва
+    function deleteReview(reviewId) {
+        const formData = new FormData();
+        formData.append('action', 'delete_review');
+        formData.append('review_id', reviewId);
+        
+        fetch('modal/handle_review.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Отзыв удален');
+                loadUserReviews(); // Обновляем список отзывов
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        });
+    }
+    
+    // Загружаем отзывы при загрузке страницы
+    loadUserReviews();
 });
 </script>
 
