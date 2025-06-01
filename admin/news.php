@@ -108,131 +108,13 @@ if ($action === 'edit' && $id > 0) {
     }
 }
 ?>
-
-<div class="admin-news">
-    <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
-    
-    <?php if (isset($error)): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
-    <?php endif; ?>
-    
-    <?php if (isset($_SESSION['message'])): ?>
-        <div class="alert alert-success"><?= htmlspecialchars($_SESSION['message']) ?></div>
-        <?php unset($_SESSION['message']); ?>
-    <?php endif; ?>
-    
-    <?php if (isset($_SESSION['error'])): ?>
-        <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
-        <?php unset($_SESSION['error']); ?>
-    <?php endif; ?>
-    
-    <?php if ($action === 'list' || $action === 'delete'): ?>
-        <div class="news-header">
-            <h2>Управление новостями</h2>
-            <a href="news.php?page=news&action=add" class="btn-custom">Добавить новость</a>
-        </div>
-        
-        <?php
-        // Получение списка новостей
-        $stmt = $pdo->query("SELECT * FROM news ORDER BY date DESC, id DESC");
-        $newsList = $stmt->fetchAll();
-        ?>
-        
-        <?php if (count($newsList) > 0): ?>
-            <div class="table-responsive">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Изображение</th>
-                            <th>Название</th>
-                            <th>Дата</th>
-                            <th>Действия</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($newsList as $item): ?>
-                            <tr>
-                                <td><?= $item['id'] ?></td>
-                                <td>
-                                    <?php if (!empty($item['image'])): ?>
-                                        <img src="../<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="img-thumbnail">
-                                    <?php endif; ?>
-                                </td>
-                                <td><?= htmlspecialchars($item['title']) ?></td>
-                                <td><?= date('d.m.Y', strtotime($item['date'])) ?></td>
-                                <td>
-                                    <div class="d-flex gap-2">
-                                        <a href="news.php?page=news&action=edit&id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">Редактировать</a>
-                                        <a href="news.php?page=news&action=delete&id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту новость?')">Удалить</a>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-            </div>
-        <?php else: ?>
-            <div class="alert alert-info">Новостей пока нет</div>
-        <?php endif; ?>
-    
-    <?php else: ?>
-        <h2><?= ($action === 'add') ? 'Добавить новость' : 'Редактировать новость' ?></h2>
-        
-        <form method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="id" value="<?= $news['id'] ?? 0 ?>">
-            
-            <?php if (isset($news['image']) && !empty($news['image'])): ?>
-                <input type="hidden" name="existing_image" value="<?= htmlspecialchars($news['image']) ?>">
-                <div class="form-group mb-3">
-                    <label>Текущее изображение:</label>
-                    <img src="../<?= htmlspecialchars($news['image']) ?>" alt="Current image" class="img-thumbnail" style="max-width: 200px;">
-                </div>
-            <?php endif; ?>
-            
-            <div class="form-group mb-3">
-                <label for="image">Изображение:</label>
-                <input type="file" id="image" name="image" class="form-control">
-                <small class="form-text text-muted">Оставьте пустым, чтобы оставить текущее изображение</small>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label for="title">Название *</label>
-                <input type="text" id="title" name="title" class="form-control" 
-                       value="<?= htmlspecialchars($news['title'] ?? '') ?>" required>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label for="short_desc">Краткое описание *</label>
-                <textarea id="short_desc" name="short_desc" class="form-control" rows="3" required><?= 
-                    htmlspecialchars($news['short_desc'] ?? '') ?></textarea>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label for="full_desc">Полное описание</label>
-                <textarea id="full_desc" name="full_desc" class="form-control" rows="5"><?= 
-                    htmlspecialchars($news['full_desc'] ?? '') ?></textarea>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label for="html_code">HTML код для вставки</label>
-                <textarea id="html_code" name="html_code" class="form-control" rows="5"><?= 
-                    htmlspecialchars($news['html_code'] ?? '') ?></textarea>
-            </div>
-            
-            <div class="form-group mb-3">
-                <label for="date">Дата публикации</label>
-                <input type="date" id="date" name="date" class="form-control" 
-                       value="<?= htmlspecialchars($news['date'] ?? date('Y-m-d')) ?>">
-            </div>
-            
-            <div class="form-group d-flex gap-2">
-                <button type="submit" class="btn btn-primary">Сохранить</button>
-                <a href="news.php?page=news" class="btn btn-secondary">Отмена</a>
-            </div>
-        </form>
-    <?php endif; ?>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../img/favicon.png" type="image/x-icon">
+    <title>Новости</title>
 
 <style>
     html{
@@ -335,7 +217,6 @@ if ($action === 'edit' && $id > 0) {
     
     .table th {
         background-color: var(--accent);
-        color: white;
         padding: 1rem;
         text-align: left;
     }
@@ -456,3 +337,129 @@ if ($action === 'edit' && $id > 0) {
         }
     }
 </style>
+</head>
+<div class="admin-news">
+    <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
+    
+    <?php if (isset($error)): ?>
+        <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="alert alert-success"><?= htmlspecialchars($_SESSION['message']) ?></div>
+        <?php unset($_SESSION['message']); ?>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
+        <?php unset($_SESSION['error']); ?>
+    <?php endif; ?>
+    
+    <?php if ($action === 'list' || $action === 'delete'): ?>
+        <div class="news-header">
+            <h2>Управление новостями</h2>
+            <a href="news.php?page=news&action=add" class="btn-custom">Добавить новость</a>
+        </div>
+        
+        <?php
+        // Получение списка новостей
+        $stmt = $pdo->query("SELECT * FROM news ORDER BY date DESC, id DESC");
+        $newsList = $stmt->fetchAll();
+        ?>
+        
+        <?php if (count($newsList) > 0): ?>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Изображение</th>
+                            <th>Название</th>
+                            <th>Дата</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($newsList as $item): ?>
+                            <tr>
+                                <td><?= $item['id'] ?></td>
+                                <td>
+                                    <?php if (!empty($item['image'])): ?>
+                                        <img src="../<?= htmlspecialchars($item['image']) ?>" alt="<?= htmlspecialchars($item['title']) ?>" class="img-thumbnail">
+                                    <?php endif; ?>
+                                </td>
+                                <td><?= htmlspecialchars($item['title']) ?></td>
+                                <td><?= date('d.m.Y', strtotime($item['date'])) ?></td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a href="news.php?page=news&action=edit&id=<?= $item['id'] ?>" class="btn btn-sm btn-warning">Редактировать</a>
+                                        <a href="news.php?page=news&action=delete&id=<?= $item['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Вы уверены, что хотите удалить эту новость?')">Удалить</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        <?php else: ?>
+            <div class="alert alert-info">Новостей пока нет</div>
+        <?php endif; ?>
+    
+    <?php else: ?>
+        <h2><?= ($action === 'add') ? 'Добавить новость' : 'Редактировать новость' ?></h2>
+        
+        <form method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="id" value="<?= $news['id'] ?? 0 ?>">
+            
+            <?php if (isset($news['image']) && !empty($news['image'])): ?>
+                <input type="hidden" name="existing_image" value="<?= htmlspecialchars($news['image']) ?>">
+                <div class="form-group mb-3">
+                    <label>Текущее изображение:</label>
+                    <img src="../<?= htmlspecialchars($news['image']) ?>" alt="Current image" class="img-thumbnail" style="max-width: 200px;">
+                </div>
+            <?php endif; ?>
+            
+            <div class="form-group mb-3">
+                <label for="image">Изображение:</label>
+                <input type="file" id="image" name="image" class="form-control">
+                <small class="form-text text-muted">Оставьте пустым, чтобы оставить текущее изображение</small>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="title">Название *</label>
+                <input type="text" id="title" name="title" class="form-control" 
+                       value="<?= htmlspecialchars($news['title'] ?? '') ?>" required>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="short_desc">Краткое описание *</label>
+                <textarea id="short_desc" name="short_desc" class="form-control" rows="3" required><?= 
+                    htmlspecialchars($news['short_desc'] ?? '') ?></textarea>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="full_desc">Полное описание</label>
+                <textarea id="full_desc" name="full_desc" class="form-control" rows="5"><?= 
+                    htmlspecialchars($news['full_desc'] ?? '') ?></textarea>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="html_code">HTML код для вставки</label>
+                <textarea id="html_code" name="html_code" class="form-control" rows="5"><?= 
+                    htmlspecialchars($news['html_code'] ?? '') ?></textarea>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label for="date">Дата публикации</label>
+                <input type="date" id="date" name="date" class="form-control" 
+                       value="<?= htmlspecialchars($news['date'] ?? date('Y-m-d')) ?>">
+            </div>
+            
+            <div class="form-group d-flex gap-2">
+                <button type="submit" class="btn btn-custom">Сохранить</button>
+                <a href="news.php?page=news" class="btn btn-secondary">Отмена</a>
+            </div>
+        </form>
+    <?php endif; ?>
+</div>
+</html>

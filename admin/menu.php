@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Обработка загрузки изображения
     $image_path = $_POST['existing_image'] ?? '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-        $upload_dir = '../uploads/menu/';
+        $upload_dir = '../img/uploads/menu/';
         if (!is_dir($upload_dir)) {
             mkdir($upload_dir, 0755, true);
         }
@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!empty($image_path) && file_exists('../' . $image_path)) {
                     unlink('../' . $image_path);
                 }
-                $image_path = 'uploads/menu/' . $file_name;
+                $image_path = 'img/uploads/menu/' . $file_name;
             }
         }
     }
@@ -180,9 +180,38 @@ foreach ($allDrinks as $drink) {
 foreach ($allVariants as $variant) {
     $variantGroups[$variant['menu_item_id']][] = $variant;
 }
+
+
+
+// Получаем параметр фильтра
+$filter = $_GET['filter'] ?? null;
+
+// Получение списка позиций для отображения с учетом фильтра
+$query = "SELECT * FROM menu_items";
+if ($filter && in_array($filter, ['new', 'drinks', 'bistro', 'gifts'])) {
+    $query .= " WHERE category = :category";
+    $stmt = $pdo->prepare($query);
+    $stmt->execute(['category' => $filter]);
+} else {
+    $stmt = $pdo->query($query);
+}
+$items = $stmt->fetchAll();
 ?>
 
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню</title>
+    <link rel="icon" href="../img/favicon.png" type="image/x-icon">
+
 <style>
+    html{
+        background-color: #f7eabd;
+    }
     .non-stop{
         gap: 15px;
         display: flex;
@@ -406,8 +435,37 @@ foreach ($allVariants as $variant) {
             margin-bottom: 1rem;
         }
     }
-</style>
 
+    .filter-section {
+        padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .btn-group .btn {
+        border-radius: 8px !important;
+        margin: 0;
+    }
+
+    .btn-group .btn-secondary {
+        background-color: #f8f9fa;
+        color: #495057;
+        border: 1px solid #dee2e6;
+    }
+
+    .btn-group .btn-secondary:hover,
+    .btn-group .btn-secondary.active {
+        background-color: #e9ecef;
+        color: #212529;
+    }
+</style>
+</head>
 <div class="admin-menu">
     <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
     
@@ -430,6 +488,17 @@ foreach ($allVariants as $variant) {
             <h2>Управление меню</h2>
             <a href="menu.php?page=menu&action=add" class="btn btn-primary">Добавить позицию</a>
         </div>
+        
+        <!-- Добавляем блок фильтрации -->
+        <div class="filter-section mb-4">
+            <div class="btn-group" role="group">
+                <a href="menu.php?page=menu" class="btn btn-secondary">Все</a>
+                <a href="menu.php?page=menu&filter=new" class="btn btn-secondary">Новинки</a>
+                <a href="menu.php?page=menu&filter=drinks" class="btn btn-secondary">Напитки</a>
+                <a href="menu.php?page=menu&filter=bistro" class="btn btn-secondary">Бистро/Пекарня</a>
+                <a href="menu.php?page=menu&filter=gifts" class="btn btn-secondary">Подарочные наборы</a>
+            </div>
+        </div
         
         <div class="table-responsive">
             <table class="table">
@@ -769,3 +838,4 @@ foreach ($allVariants as $variant) {
         </script>
     <?php endif; ?>
 </div>
+</html>

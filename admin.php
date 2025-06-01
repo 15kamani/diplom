@@ -101,7 +101,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
         
         .admin-veber{
             display: flex;
-            justify-content: space-evenly;
+            margin: 2%;
+            flex-direction: row;
+            gap: 60px;
         }
 
         .btn-custom {
@@ -147,6 +149,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['username'] !== 'admin') {
                 <img src="img/header/logo.jpg" alt="" style="border-radius: 40%;">
             </div>
         </div>
+        <h2>Работа с пользователями:</h2>
+        <div class="admin-veber">
+            <a href="admin/orders.php" class="btn-custom">ЗАКАЗЫ</a>
+            <a href="admin/booking.php" class="btn-custom">БРОНИРОВАНИЕ</a>
+        </div>
+        <h2>Работа с контентом: </h2>
         <div class="admin-veber">
             <a href="admin/event.php" class="btn-custom">ИВЕНТ</a>
             <a href="admin/news.php" class="btn-custom">БЛОГ</a>

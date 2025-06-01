@@ -54,100 +54,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Получение списка событий для отображения
 $events = $pdo->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll(PDO::FETCH_ASSOC);
 ?>
-
-<div class="admin-container">
-    <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
-    <h2 style="color: var(--dark); margin-bottom: 1.5rem;">Управление событиями</h2>
-    
-    <!-- Форма добавления нового события -->
-    <div class="event-form">
-        <h3>Добавить новое событие</h3>
-        <form method="POST" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="title">Название события:</label>
-                <input type="text" id="title" name="title" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="short_description">Краткое описание:</label>
-                <textarea id="short_description" name="short_description" rows="3" required></textarea>
-                <small>Краткое описание события, которое будет отображаться в превью</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="detailed_description">Подробное описание (по пунктам):</label>
-                <textarea id="detailed_description" name="detailed_description" rows="5" required></textarea>
-                <small>Каждая новая строка будет преобразована в отдельный пункт при выводе</small>
-            </div>
-            
-            <div class="form-group">
-                <label for="event_url">Ссылка на событие:</label>
-                <input type="url" id="event_url" name="event_url" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Изображения (можно загрузить 3-4 фото):</label>
-                <div class="image-uploads">
-                    <input type="file" name="image1" accept="image/*">
-                    <input type="file" name="image2" accept="image/*">
-                    <input type="file" name="image3" accept="image/*">
-                    <input type="file" name="image4" accept="image/*">
-                </div>
-            </div>
-            
-            <button type="submit" class="btn-admin">Сохранить событие</button>
-        </form>
-    </div>
-    
-    <!-- Список существующих событий -->
-    <div class="events-list">
-        <h3>Существующие события</h3>
-        
-        <?php if (empty($events)): ?>
-            <p>Нет добавленных событий</p>
-        <?php else: ?>
-            <div class="events-grid">
-                <?php foreach ($events as $event): ?>
-                    <div class="event-card">
-                        <div class="event-images">
-                            <?php for ($i = 1; $i <= 4; $i++): ?>
-                                <?php if (!empty($event["image{$i}"])): ?>
-                                    <img src="<?= htmlspecialchars($event["image{$i}"]) ?>" alt="Изображение события <?= $i ?>">
-                                <?php endif; ?>
-                            <?php endfor; ?>
-                        </div>
-                        
-                        <h4><?= htmlspecialchars($event['title']) ?></h4>
-                        
-                        <div class="event-short-description">
-                            <?= nl2br(htmlspecialchars($event['short_description'])) ?>
-                        </div>
-                        
-                        <div class="event-detailed-description">
-                            <?php 
-                            $lines = explode("\n", $event['detailed_description']);
-                            echo '<ul>';
-                            foreach ($lines as $line) {
-                                echo '<li>' . htmlspecialchars(trim($line)) . '</li>';
-                            }
-                            echo '</ul>';
-                            ?>
-                        </div>
-                        
-                        <a href="<?= htmlspecialchars($event['event_url']) ?>" target="_blank" class="event-link">Перейти к событию</a>
-                        
-                        <form method="POST" action="delete_event.php" class="delete-form">
-                            <input type="hidden" name="event_id" value="<?= $event['id'] ?>">
-                            <button type="submit" class="btn-delete">Удалить</button>
-                        </form>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endif; ?>
-    </div>
-</div>
-
-<style>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="../img/favicon.png" type="image/x-icon">
+    <title>События</title>
+    <style>
     html{
         background-color: #f7eabd;
     }
@@ -370,3 +284,96 @@ $events = $pdo->query("SELECT * FROM events ORDER BY created_at DESC")->fetchAll
         }
     }
 </style>
+</head>
+<div class="admin-container">
+    <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
+    <h2 style="color: var(--dark); margin-bottom: 1.5rem;">Управление событиями</h2>
+    
+    <!-- Форма добавления нового события -->
+    <div class="event-form">
+        <h3>Добавить новое событие</h3>
+        <form method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">Название события:</label>
+                <input type="text" id="title" name="title" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="short_description">Краткое описание:</label>
+                <textarea id="short_description" name="short_description" rows="3" required></textarea>
+                <small>Краткое описание события, которое будет отображаться в превью</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="detailed_description">Подробное описание (по пунктам):</label>
+                <textarea id="detailed_description" name="detailed_description" rows="5" required></textarea>
+                <small>Каждая новая строка будет преобразована в отдельный пункт при выводе</small>
+            </div>
+            
+            <div class="form-group">
+                <label for="event_url">Ссылка на событие:</label>
+                <input type="url" id="event_url" name="event_url" required>
+            </div>
+            
+            <div class="form-group">
+                <label>Изображения (можно загрузить 3-4 фото):</label>
+                <div class="image-uploads">
+                    <input type="file" name="image1" accept="image/*">
+                    <input type="file" name="image2" accept="image/*">
+                    <input type="file" name="image3" accept="image/*">
+                    <input type="file" name="image4" accept="image/*">
+                </div>
+            </div>
+            
+            <button type="submit" class="btn-admin">Сохранить событие</button>
+        </form>
+    </div>
+    
+    <!-- Список существующих событий -->
+    <div class="events-list">
+        <h3>Существующие события</h3>
+        
+        <?php if (empty($events)): ?>
+            <p>Нет добавленных событий</p>
+        <?php else: ?>
+            <div class="events-grid">
+                <?php foreach ($events as $event): ?>
+                    <div class="event-card">
+                        <div class="event-images">
+                            <?php for ($i = 1; $i <= 4; $i++): ?>
+                                <?php if (!empty($event["image{$i}"])): ?>
+                                    <img src="<?= htmlspecialchars($event["image{$i}"]) ?>" alt="Изображение события <?= $i ?>">
+                                <?php endif; ?>
+                            <?php endfor; ?>
+                        </div>
+                        
+                        <h4><?= htmlspecialchars($event['title']) ?></h4>
+                        
+                        <div class="event-short-description">
+                            <?= nl2br(htmlspecialchars($event['short_description'])) ?>
+                        </div>
+                        
+                        <div class="event-detailed-description">
+                            <?php 
+                            $lines = explode("\n", $event['detailed_description']);
+                            echo '<ul>';
+                            foreach ($lines as $line) {
+                                echo '<li>' . htmlspecialchars(trim($line)) . '</li>';
+                            }
+                            echo '</ul>';
+                            ?>
+                        </div>
+                        
+                        <a href="<?= htmlspecialchars($event['event_url']) ?>" target="_blank" class="event-link">Перейти к событию</a>
+                        
+                        <form method="POST" action="delete_event.php" class="delete-form">
+                            <input type="hidden" name="event_id" value="<?= $event['id'] ?>">
+                            <button type="submit" class="btn-delete">Удалить</button>
+                        </form>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+</html>

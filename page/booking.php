@@ -14,7 +14,7 @@ $isAuthenticated = isset($_SESSION['user_id']);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <!-- Подключение стилей проекта -->
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/proverka.css">
     <link rel="stylesheet" href="../css/media.css">
     <!-- Шрифты -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -118,7 +118,13 @@ $isAuthenticated = isset($_SESSION['user_id']);
                         <span>Столик 4</span>
                     </div>
                 </div>
-
+                    <?php if (!isset($_SESSION['user_id'])): ?>
+                        <div class="mb-3">
+                            <h4>При бронировании столика без входа в аккаунт, ожидайте звонка от менеджера.</h4>
+                            <p>Для сохранения истории бронирования <a href="#" data-bs-target="#registerModal" data-bs-toggle="modal">создайте</a> или <a href="#" data-bs-target="#LoginModal" data-bs-toggle="modal">войдите</a> в аккаунт.</p>
+                        </div>
+                    <?php endif; ?>
+                    
                 <form id="bookingForm" action="../components/booking_handler.php" method="POST">
                     <input type="hidden" name="reservation_type" value="table">
                     
@@ -179,6 +185,12 @@ $isAuthenticated = isset($_SESSION['user_id']);
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                    <?php if (!isset($_SESSION['user_id'])): ?>
+                        <div class="mb-3">
+                            <h4>При бронировании зала без входа в аккаунт, ожидайте звонка от менеджера.</h4>
+                            <p>Для сохранения истории бронирования <a href="#" data-bs-target="#registerModal" data-bs-toggle="modal">создайте</a> или <a href="#" data-bs-target="#LoginModal" data-bs-toggle="modal">войдите</a> в аккаунт.</p>
+                        </div>
+                    <?php endif; ?>                
                 <!-- Форма бронирования зала -->
                 <form id="bookingHallForm" action="../components/booking_handler.php" method="POST">
                     <input type="hidden" name="reservation_type" value="hall">
