@@ -1533,5 +1533,9 @@ iframe {
 
 .for-otziv{
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+}
+
+.forma-otziv{
+    width: 680px;
 }

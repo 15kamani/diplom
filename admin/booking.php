@@ -60,10 +60,7 @@ unset($_SESSION['flash_message']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Администрирование бронирований</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="icon" href="../img/favicon.png" type="image/x-icon">
-
     <style>
         :root {
             --dark: #24211C;
@@ -71,22 +68,36 @@ unset($_SESSION['flash_message']);
             --light: #f7eabd;
         }
         
-        .admin-container {
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .admin-gallery {
             background-color: white;
             border-radius: 15px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
             padding: 2rem;
-            margin: 2rem auto;
-            max-width: 95%;
+            margin: 2rem 12% 3rem;
         }
         
-        h2 {
+        h1, h2 {
             color: var(--dark);
             border-bottom: 2px solid var(--accent);
             padding-bottom: 0.5rem;
             margin-bottom: 1.5rem;
         }
         
+        h1 {
+            font-size: 2rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+        
+        /* Кнопка "Назад" */
         .back-link {
             display: inline-block;
             margin-bottom: 1.5rem;
@@ -95,17 +106,43 @@ unset($_SESSION['flash_message']);
             font-weight: 600;
         }
         
-        .table-responsive {
-            overflow-x: auto;
+        .back-link:hover {
+            color: #a57352;
+            text-decoration: underline;
         }
         
-        .table th {
+        /* Таблица */
+        .table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 1.5rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
             background-color: var(--accent);
             color: white;
-            vertical-align: middle;
+            font-weight: 600;
         }
         
+        tr:hover {
+            background-color: rgba(192, 135, 92, 0.05);
+        }
+        
+        /* Бейджи статусов */
         .status-badge {
+            display: inline-block;
             padding: 0.35rem 0.65rem;
             border-radius: 50rem;
             font-size: 0.75rem;
@@ -132,37 +169,131 @@ unset($_SESSION['flash_message']);
             color: white;
         }
         
-        .action-buttons .btn {
+        /* Бейджи типов */
+        .type-badge {
+            display: inline-block;
+            padding: 0.35rem 0.65rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .type-hall {
+            background-color: #ffc107;
+            color: var(--dark);
+        }
+        
+        .type-table {
+            background-color: #0dcaf0;
+            color: white;
+            text-align: center;
+        }
+        
+        /* Кнопки */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            font-size: 0.85rem;
             margin-right: 0.5rem;
             margin-bottom: 0.5rem;
         }
         
-        .cancel-reason {
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 0.5rem;
+        .btn-confirm {
+            background-color: #198754;
+            color: white;
         }
         
-        .modal-cancel textarea {
+        .btn-cancel {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        /* Форма отмены */
+        .cancel-form {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .cancel-form textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
             min-height: 100px;
+            margin-bottom: 1rem;
+            resize: vertical;
         }
         
-        .pagination .page-item.active .page-link {
+        /* Сообщения */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid;
+        }
+        
+        .alert-success {
+            background-color: #d1e7dd;
+            color: #0f5132;
+            border-left-color: #198754;
+        }
+        
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        
+        /* Пагинация */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+            gap: 0.5rem;
+        }
+        
+        .page-item {
+            list-style: none;
+        }
+        
+        .page-link {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+            border: 1px solid #ddd;
+        }
+        
+        .page-item.active .page-link {
             background-color: var(--accent);
+            color: white;
             border-color: var(--accent);
         }
         
-        .pagination .page-link {
-            color: var(--accent);
-        }
-        
+        /* Адаптивность */
         @media (max-width: 768px) {
-            .admin-container {
-                padding: 1rem;
+            .admin-gallery {
                 margin: 1rem;
+                padding: 1rem;
             }
             
-            .action-buttons .btn {
+            th, td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.85rem;
+            }
+            
+            .btn {
                 display: block;
                 width: 100%;
                 margin-right: 0;
@@ -171,191 +302,153 @@ unset($_SESSION['flash_message']);
     </style>
 </head>
 <body>
-    <div class="container-fluid">
-        <div class="admin-container">
-            <a href="../admin.php" class="back-link">
-                <i class="bi bi-arrow-left"></i> Назад в админ-панель
-            </a>
-            <h2><i class="bi bi-calendar-check"></i> Управление бронированиями</h2>
-            
-            <?php if (isset($error)): ?>
-                <div class="alert alert-danger alert-dismissible fade show">
-                    <?= htmlspecialchars($error) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-            
-            <?php if ($flashMessage): ?>
-                <div class="alert alert-<?= $flashMessage['type'] ?> alert-dismissible fade show">
-                    <?= htmlspecialchars($flashMessage['message']) ?>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            <?php endif; ?>
-            
-            <div class="table-responsive">
-                <table class="table table-hover align-middle">
-                    <thead>
+    <div class="admin-gallery">
+        <a href="../admin.php" class="back-link">← Назад в админ-панель</a>
+        <h1>Управление бронированиями</h1>
+        
+        <?php if (isset($error)): ?>
+            <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+        
+        <?php if ($flashMessage): ?>
+            <div class="alert alert-<?= $flashMessage['type'] ?>">
+                <?= htmlspecialchars($flashMessage['message']) ?>
+            </div>
+        <?php endif; ?>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Тип</th>
+                        <th>Клиент</th>
+                        <th>Контакты</th>
+                        <th>Дата/Время</th>
+                        <th>Детали</th>
+                        <th>Статус</th>
+                        <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (empty($reservations)): ?>
                         <tr>
-                            <th>ID</th>
-                            <th>Тип</th>
-                            <th>Клиент</th>
-                            <th>Контакты</th>
-                            <th>Дата/Время</th>
-                            <th>Детали</th>
-                            <th>Статус</th>
-                            <th>Действия</th>
+                            <td colspan="8" style="text-align: center; padding: 2rem;">Нет бронирований</td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        <?php if (empty($reservations)): ?>
+                    <?php else: ?>
+                        <?php foreach ($reservations as $reservation): ?>
                             <tr>
-                                <td colspan="8" class="text-center py-4">Нет бронирований</td>
+                                <td><?= $reservation['id'] ?></td>
+                                <td>
+                                    <?php if ($reservation['reservation_type'] === 'hall'): ?>
+                                        <span class="type-badge type-hall">Зал</span>
+                                    <?php else: ?>
+                                        <span class="type-badge type-table">Столик <?= $reservation['table_number'] ?></span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?= htmlspecialchars($reservation['name']) ?>
+                                    <?php if ($reservation['user_id']): ?>
+                                        <br><small style="color: #6c757d;">Аккаунт: <?= htmlspecialchars($reservation['user_name'] ?? '') ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?= htmlspecialchars($reservation['phone']) ?>
+                                    <br>
+                                    <small style="color: #6c757d;"><?= htmlspecialchars($reservation['email'] ?? $reservation['user_email'] ?? '') ?></small>
+                                </td>
+                                <td>
+                                    <?= date('d.m.Y', strtotime($reservation['date'])) ?>
+                                    <br>
+                                    <small style="color: #6c757d;"><?= substr($reservation['time'], 0, 5) ?></small>
+                                </td>
+                                <td>
+                                    <?php if ($reservation['reservation_type'] === 'hall'): ?>
+                                        Мероприятие: <?= htmlspecialchars($reservation['event_type']) ?>
+                                        <br>Гостей: <?= $reservation['guests'] ?>
+                                    <?php else: ?>
+                                        Гостей: <?= $reservation['guests'] ?>
+                                    <?php endif; ?>
+                                    <?php if (!empty($reservation['comments'])): ?>
+                                        <br><small style="color: #6c757d;"><?= htmlspecialchars($reservation['comments']) ?></small>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php
+                                    $statusClass = 'status-' . $reservation['status'];
+                                    $statusText = [
+                                        'new' => 'Новый',
+                                        'pending' => 'Ожидает',
+                                        'confirmed' => 'Подтверждено',
+                                        'cancelled' => 'Отменено'
+                                    ][$reservation['status']];
+                                    ?>
+                                    <span class="status-badge <?= $statusClass ?>">
+                                        <?= $statusText ?>
+                                    </span>
+                                    <?php if ($reservation['status'] === 'cancelled' && !empty($reservation['cancel_reason'])): ?>
+                                        <div style="margin-top: 0.5rem;">
+                                            <small style="color: #6c757d;"><strong>Причина:</strong> <?= htmlspecialchars($reservation['cancel_reason']) ?></small>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($reservation['status'] === 'new' || $reservation['status'] === 'pending'): ?>
+                                        <form method="post" style="display: inline;">
+                                            <input type="hidden" name="id" value="<?= $reservation['id'] ?>">
+                                            <input type="hidden" name="action" value="confirm">
+                                            <button type="submit" class="btn btn-confirm">Подтвердить</button>
+                                        </form>
+                                        
+                                        <button class="btn btn-cancel" onclick="showCancelForm(<?= $reservation['id'] ?>)">Отменить</button>
+                                        
+                                        <form method="post" id="cancelForm<?= $reservation['id'] ?>" class="cancel-form">
+                                            <input type="hidden" name="id" value="<?= $reservation['id'] ?>">
+                                            <input type="hidden" name="action" value="cancel">
+                                            <textarea name="reason" placeholder="Укажите причину отмены..." required></textarea>
+                                            <button type="submit" class="btn btn-cancel">Подтвердить отмену</button>
+                                            <button type="button" class="btn" onclick="hideCancelForm(<?= $reservation['id'] ?>)" style="background-color: #6c757d; color: white;">Отмена</button>
+                                        </form>
+                                    <?php endif; ?>
+                                </td>
                             </tr>
-                        <?php else: ?>
-                            <?php foreach ($reservations as $reservation): ?>
-                                <tr>
-                                    <td><?= $reservation['id'] ?></td>
-                                    <td>
-                                        <?php if ($reservation['reservation_type'] === 'hall'): ?>
-                                            <span class="badge bg-warning text-dark">Зал</span>
-                                        <?php else: ?>
-                                            <span class="badge bg-info text-dark">Столик <?= $reservation['table_number'] ?></span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?= htmlspecialchars($reservation['name']) ?>
-                                        <?php if ($reservation['user_id']): ?>
-                                            <br><small class="text-muted">Аккаунт: <?= htmlspecialchars($reservation['user_name'] ?? '') ?></small>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?= htmlspecialchars($reservation['phone']) ?>
-                                        <br>
-                                        <small class="text-muted"><?= htmlspecialchars($reservation['email'] ?? $reservation['user_email'] ?? '') ?></small>
-                                    </td>
-                                    <td>
-                                        <?= date('d.m.Y', strtotime($reservation['date'])) ?>
-                                        <br>
-                                        <small><?= substr($reservation['time'], 0, 5) ?></small>
-                                    </td>
-                                    <td>
-                                        <?php if ($reservation['reservation_type'] === 'hall'): ?>
-                                            Мероприятие: <?= htmlspecialchars($reservation['event_type']) ?>
-                                            <br>Гостей: <?= $reservation['guests'] ?>
-                                        <?php else: ?>
-                                            Гостей: <?= $reservation['guests'] ?>
-                                        <?php endif; ?>
-                                        <?php if (!empty($reservation['comments'])): ?>
-                                            <br><small class="text-muted"><?= htmlspecialchars($reservation['comments']) ?></small>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td>
-                                        <?php
-                                        $statusClass = 'status-' . $reservation['status'];
-                                        $statusText = [
-                                            'new' => 'Новый',
-                                            'pending' => 'Ожидает',
-                                            'confirmed' => 'Подтверждено',
-                                            'cancelled' => 'Отменено'
-                                        ][$reservation['status']];
-                                        ?>
-                                        <span class="status-badge <?= $statusClass ?>">
-                                            <?= $statusText ?>
-                                        </span>
-                                        <?php if ($reservation['status'] === 'cancelled' && !empty($reservation['cancel_reason'])): ?>
-                                            <div class="cancel-reason">
-                                                <small><strong>Причина:</strong> <?= htmlspecialchars($reservation['cancel_reason']) ?></small>
-                                            </div>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="action-buttons">
-                                        <?php if ($reservation['status'] === 'new' || $reservation['status'] === 'pending'): ?>
-                                            <form method="post" class="d-inline">
-                                                <input type="hidden" name="id" value="<?= $reservation['id'] ?>">
-                                                <input type="hidden" name="action" value="confirm">
-                                                <button type="submit" class="btn btn-success btn-sm">
-                                                    <i class="bi bi-check-circle"></i> Подтвердить
-                                                </button>
-                                            </form>
-                                            
-                                            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" 
-                                                data-bs-target="#cancelModal" data-id="<?= $reservation['id'] ?>">
-                                                <i class="bi bi-x-circle"></i> Отменить
-                                            </button>
-                                        <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Пагинация -->
-            <?php if ($totalPages > 1): ?>
-                <nav aria-label="Page navigation">
-                    <ul class="pagination justify-content-center mt-4">
-                        <?php if ($page > 1): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="?page=<?= $page - 1 ?>">Назад</a>
-                            </li>
-                        <?php endif; ?>
-                        
-                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                                <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
-                            </li>
-                        <?php endfor; ?>
-                        
-                        <?php if ($page < $totalPages): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="?page=<?= $page + 1 ?>">Вперед</a>
-                            </li>
-                        <?php endif; ?>
-                    </ul>
-                </nav>
-            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
         </div>
+        
+        <!-- Пагинация -->
+        <?php if ($totalPages > 1): ?>
+            <div class="pagination">
+                <?php if ($page > 1): ?>
+                    <div class="page-item">
+                        <a class="page-link" href="?page=<?= $page - 1 ?>">Назад</a>
+                    </div>
+                <?php endif; ?>
+                
+                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                    <div class="page-item <?= $i == $page ? 'active' : '' ?>">
+                        <a class="page-link" href="?page=<?= $i ?>"><?= $i ?></a>
+                    </div>
+                <?php endfor; ?>
+                
+                <?php if ($page < $totalPages): ?>
+                    <div class="page-item">
+                        <a class="page-link" href="?page=<?= $page + 1 ?>">Вперед</a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
     </div>
 
-    <!-- Модальное окно отмены бронирования -->
-    <div class="modal fade" id="cancelModal" tabindex="-1" aria-labelledby="cancelModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="cancelModalLabel">Отмена бронирования</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form method="post" class="modal-cancel">
-                    <div class="modal-body">
-                        <input type="hidden" name="id" id="cancelReservationId">
-                        <input type="hidden" name="action" value="cancel">
-                        
-                        <div class="mb-3">
-                            <label for="cancelReason" class="form-label">Укажите причину отмены:</label>
-                            <textarea class="form-control" id="cancelReason" name="reason" required></textarea>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                        <button type="submit" class="btn btn-danger">Подтвердить отмену</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Инициализация модального окна отмены
-        var cancelModal = document.getElementById('cancelModal');
-        if (cancelModal) {
-            cancelModal.addEventListener('show.bs.modal', function (event) {
-                var button = event.relatedTarget;
-                var reservationId = button.getAttribute('data-id');
-                var modalInput = cancelModal.querySelector('#cancelReservationId');
-                modalInput.value = reservationId;
-            });
+        function showCancelForm(id) {
+            document.getElementById('cancelForm' + id).style.display = 'block';
+        }
+        
+        function hideCancelForm(id) {
+            document.getElementById('cancelForm' + id).style.display = 'none';
         }
     </script>
 </body>

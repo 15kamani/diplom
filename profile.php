@@ -29,37 +29,50 @@ try {
 
 // Обработка загрузки аватара
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
-    $uploadDir = __DIR__ . '/img/uploads/avatar/';
+    $uploadDir = 'img/uploads/avatar/'; // Относительный путь от корня сайта
+    $absoluteUploadDir = __DIR__ . '/' . $uploadDir; // Абсолютный путь на сервере
 
     // Создаем директорию, если ее нет
-    if (!file_exists($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
+    if (!file_exists($absoluteUploadDir)) {
+        mkdir($absoluteUploadDir, 0777, true);
     }
 
     $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
     $fileType = $_FILES['avatar']['type'];
 
     if (!in_array($fileType, $allowedTypes)) {
-        die("Недопустимый тип файла. Разрешены только JPEG, PNG и GIF.");
+        $_SESSION['error'] = "Недопустимый тип файла. Разрешены только JPEG, PNG и GIF.";
+        header("Location: profile.php");
+        exit;
+    }
+
+    // Проверяем размер файла (максимум 2MB)
+    if ($_FILES['avatar']['size'] > 2 * 1024 * 1024) {
+        $_SESSION['error'] = "Файл слишком большой. Максимальный размер - 2MB.";
+        header("Location: profile.php");
+        exit;
     }
 
     // Генерируем уникальное имя файла
-    $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+    $extension = strtolower(pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION));
     $newFileName = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $extension;
-    $uploadPath = $uploadDir . $newFileName;
+    $uploadPath = $absoluteUploadDir . $newFileName;
 
     if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadPath)) {
         // Обновляем путь в базе данных
-        $relativePath = 'img/uploads/avatar/' . $newFileName;
+        $relativePath = $uploadDir . $newFileName;
         $stmt = $pdo->prepare("UPDATE users SET avatar_path = ? WHERE id = ?");
         $stmt->execute([$relativePath, $_SESSION['user_id']]);
 
         // Обновляем сессию и перезагружаем страницу
         $_SESSION['avatar_path'] = $relativePath;
+        $_SESSION['success'] = "Аватар успешно обновлен!";
         header("Location: profile.php");
         exit;
     } else {
-        die("Ошибка при загрузке файла.");
+        $_SESSION['error'] = "Ошибка при загрузке файла.";
+        header("Location: profile.php");
+        exit;
     }
 }
 ?>
@@ -174,15 +187,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
         <div class="profile-card card-t">
             <div class="user-card">
                 <div class="user-card-img">
+                    <?php if (isset($_SESSION['error'])): ?>
+                        <div class="alert alert-danger"><?= htmlspecialchars($_SESSION['error']) ?></div>
+                        <?php unset($_SESSION['error']); ?>
+                    <?php endif; ?>
+                    
+                    <?php if (isset($_SESSION['success'])): ?>
+                        <div class="alert alert-success"><?= htmlspecialchars($_SESSION['success']) ?></div>
+                        <?php unset($_SESSION['success']); ?>
+                    <?php endif; ?>
+                    
                     <img src="<?= htmlspecialchars($avatar_path) ?>" alt="Аватар" class="avatar-image">
-                    <button type="button" class="btn btn-secondary btn-toggle-upload mt-2">Обновить аватар</button>
+                    <button type="button" class="btn btn-custom btn-toggle-upload mt-2" style="font-size: 15px; background-color: #c0875c;">Обновить аватар</button>
 
                     <div class="avatar-upload-container">
                         <form id="avatarForm" method="POST" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <input type="file" class="form-control" id="avatarInput" name="avatar" accept="image/*" required>
+                                <input type="file" class="form-control" id="avatarInput" name="avatar" accept="image/jpeg, image/png, image/gif" required>
+                                <div class="form-text"><p>Максимальный размер файла: 2MB. Допустимые форматы: JPEG, PNG, GIF.</p></div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Загрузить</button>
+                            <button type="submit" class="btn btn-custom" style="font-size: 15px;">Загрузить</button>
                             <button type="button" class="btn btn-outline-secondary cancel-upload ms-2">Отмена</button>
                         </form>
                     </div>
@@ -427,7 +451,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
 
         <!-- Скрытый div с формой -->
         <div id="reviewFormContainer" style="display: none; margin-top: 20px;">
-            <div class="card-t">
+            <div class="card-t forma-otziv">
                 <div class="card-body">
                     <h5 class="card-title">Оставить отзыв</h5>
                     <form id="reviewForm" method="POST">
@@ -447,19 +471,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
                                 <option value="1">1 - Очень плохо</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-success">Отправить отзыв</button>
+                        <button type="submit" class="btn btn-custom" style="font-size: 16px;">Отправить отзыв</button>
                         <button type="button" id="cancelReview" class="btn btn-outline-secondary">Отмена</button>
                     </form>
                 </div>
             </div>
         </div>
 
-        <!-- Секция для отображения отзывов пользователя -->
-        <div id="userReviews" class="mt-5">
-            <h3>Ваши отзывы</h3>
-            <div class="reviews-list"></div>
-        </div>
     </div>
+    <!-- Секция для отображения отзывов пользователя -->
+     
+    <?php
+    // Проверяем есть ли отзывы у пользователя
+    $hasReviews = false;
+    try {
+        if (isset($_SESSION['user_id'])) {
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM reviews WHERE user_id = ?");
+            $stmt->execute([$_SESSION['user_id']]);
+            $hasReviews = $stmt->fetchColumn() > 0;
+        }
+    } catch (PDOException $e) {
+        // В случае ошибки просто не показываем блок
+        $hasReviews = false;
+    }
+
+    if ($hasReviews): ?>
+    <div id="userReviews" class="mt-5">
+        <h3>Ваши отзывы</h3>
+        <div class="reviews-list"></div>
+    </div>
+    <?php endif; ?>
 </main>
 
 <?php include 'components/footer.php'; ?>
@@ -470,6 +511,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
 <script src="js/script-modal.js"></script>
 
 <script>
+
+$(document).ready(function() {
+    // Переключение формы загрузки аватара
+    $('.btn-toggle-upload').click(function() {
+        $('.avatar-upload-container').toggle();
+    });
+    
+    $('.cancel-upload').click(function() {
+        $('.avatar-upload-container').hide();
+        $('#avatarForm')[0].reset();
+    });
+
+    // Валидация формы перед отправкой
+    $('#avatarForm').on('submit', function(e) {
+        const fileInput = $('#avatarInput')[0];
+        if (fileInput.files.length === 0) {
+            alert('Пожалуйста, выберите файл');
+            return false;
+        }
+        
+        const file = fileInput.files[0];
+        const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        
+        if (!validTypes.includes(file.type)) {
+            alert('Недопустимый тип файла. Разрешены только JPEG, PNG и GIF.');
+            return false;
+        }
+        
+        if (file.size > maxSize) {
+            alert('Файл слишком большой. Максимальный размер - 2MB.');
+            return false;
+        }
+        
+        return true;
+    });
+});
+
 $(document).ready(function() {
     // Переключение формы загрузки аватара
     $('.btn-toggle-upload').click(function() {

@@ -348,6 +348,9 @@
     /* Адаптивность для стрелочек */
     @media (max-width: 768px) {
 
+        .forma-otziv{
+            width: 480px;
+        }
         .carousel-control-prev,
         .carousel-control-next {
             width: 40px;
@@ -386,5 +389,9 @@
         
             .icon-offer img {
                 width: 2rem;
+            }
+
+            .forma-otziv{
+                width: 380px;
             }
         }

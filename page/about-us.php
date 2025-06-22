@@ -168,7 +168,7 @@ require_once '../components/db_connect.php';
                         
                         echo '
                         <div class="review-card '.$activeClass.'">
-                            <div class="card">
+                            <div class="card-t">
                                 <img src="'.$avatarPath.'" class="card-img-retwit" alt="Фото автора">
                                 <div class="card-body">
                                     <h5 class="card-title">'.htmlspecialchars($review['full_name']).'</h5>
