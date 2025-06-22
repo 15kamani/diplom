@@ -19,7 +19,7 @@ try {
         throw new Exception("Пользователь не найден");
     }
 
-    $avatar_path = (isset($user['avatar_path']) && file_exists($user['avatar_path'])) 
+    $avatar_path = (isset($user['avatar_path']) && !empty($user['avatar_path']) && file_exists($user['avatar_path'])) 
         ? $user['avatar_path'] 
         : 'img/icon/default_avatar.png';
 
@@ -27,97 +27,41 @@ try {
     die("Ошибка: " . $e->getMessage());
 }
 
-// Получение товаров в корзине пользователя
-$cartItems = [];
-$cartTotal = 0;
-try {
-    $stmt = $pdo->prepare("
-        SELECT c.*, m.title, m.image 
-        FROM cart c
-        JOIN menu_items m ON c.menu_item_id = m.id
-        WHERE c.user_id = ?
-    ");
-    $stmt->execute([$_SESSION['user_id']]);
-    $cartItems = $stmt->fetchAll();
-    
-    foreach ($cartItems as $item) {
-        $cartTotal += $item['price'] * $item['quantity'];
+// Обработка загрузки аватара
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
+    $uploadDir = __DIR__ . '/img/uploads/avatar/';
+
+    // Создаем директорию, если ее нет
+    if (!file_exists($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
     }
-} catch (PDOException $e) {
-    $cartError = "Ошибка при загрузке корзины";
-}
 
-// Получение заказов пользователя
-$userOrders = [];
-try {
-    $stmt = $pdo->prepare("
-        SELECT id, order_date, total_amount, status 
-        FROM orders 
-        WHERE user_id = ?
-        ORDER BY order_date DESC
-    ");
-    $stmt->execute([$_SESSION['user_id']]);
-    $userOrders = $stmt->fetchAll();
-} catch (PDOException $e) {
-    $ordersError = "Ошибка при загрузке заказов";
-}
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    $fileType = $_FILES['avatar']['type'];
 
-// Обработка оформления заказа
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
-    try {
-        $deliveryType = $_POST['delivery_type'] ?? 'pickup';
-        $deliveryAddress = $_POST['delivery_address'] ?? null;
-        $deliveryTime = $_POST['delivery_time'];
-        $notes = $_POST['customer_notes'] ?? null;
-        
-        // Формируем дату и время доставки
-        $deliveryDateTime = date('Y-m-d') . ' ' . $deliveryTime . ':00';
-        
-        $pdo->beginTransaction();
-        
-        // Создаем заказ
-        $stmt = $pdo->prepare("
-            INSERT INTO orders (user_id, total_amount, status, delivery_type, delivery_address, delivery_time, customer_notes)
-            VALUES (?, ?, 'new', ?, ?, ?, ?)
-        ");
-        $stmt->execute([
-            $_SESSION['user_id'],
-            $cartTotal,
-            $deliveryType,
-            $deliveryAddress,
-            $deliveryDateTime,
-            $notes
-        ]);
-        $orderId = $pdo->lastInsertId();
-        
-        // Переносим товары в заказ и очищаем корзину (как в предыдущем коде)
-        
-        $pdo->commit();
-        
-        header("Location: profile.php?order_success=" . $orderId);
-        exit();
-    } catch (Exception $e) {
-        $pdo->rollBack();
-        $orderError = "Ошибка при оформлении заказа: " . $e->getMessage();
+    if (!in_array($fileType, $allowedTypes)) {
+        die("Недопустимый тип файла. Разрешены только JPEG, PNG и GIF.");
+    }
+
+    // Генерируем уникальное имя файла
+    $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
+    $newFileName = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $extension;
+    $uploadPath = $uploadDir . $newFileName;
+
+    if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadPath)) {
+        // Обновляем путь в базе данных
+        $relativePath = 'img/uploads/avatar/' . $newFileName;
+        $stmt = $pdo->prepare("UPDATE users SET avatar_path = ? WHERE id = ?");
+        $stmt->execute([$relativePath, $_SESSION['user_id']]);
+
+        // Обновляем сессию и перезагружаем страницу
+        $_SESSION['avatar_path'] = $relativePath;
+        header("Location: profile.php");
+        exit;
+    } else {
+        die("Ошибка при загрузке файла.");
     }
 }
-
-
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
-    exit;
-}
-
-// Получение данных пользователя
-$stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
-$stmt->execute([$_SESSION['user_id']]);
-$user = $stmt->fetch();
-
-// Получение бронирований пользователя
-$query = "SELECT * FROM reservations WHERE user_id = ? ORDER BY date DESC, time DESC";
-$stmt = $pdo->prepare($query);
-$stmt->execute([$_SESSION['user_id']]);
-$reservations = $stmt->fetchAll();
 ?>
 
 <!DOCTYPE html>
@@ -134,16 +78,6 @@ $reservations = $stmt->fetchAll();
     <link rel="icon" href="img/favicon.png" type="image/x-icon">
     <title>Кофе с СоВой</title>
     <style>
-        .avatar-upload-container { display: none; }
-        .avatar-image { max-width: 150px; max-height: 150px; border-radius: 50%; }
-        .order-card { border-left: 4px solid; margin-bottom: 15px; }
-        .order-new { border-left-color: #0d6efd; }
-        .order-processing { border-left-color: #fd7e14; }
-        .order-shipped { border-left-color: #ffc107; }
-        .order-completed { border-left-color: #198754; }
-        .order-cancelled { border-left-color: #dc3545; }
-        .order-status { font-weight: bold; }
-        .cart-item-image { max-width: 50px; max-height: 50px; object-fit: cover; }
         .avatar-upload-container {
             margin-top: 15px;
             padding: 15px;
@@ -151,28 +85,80 @@ $reservations = $stmt->fetchAll();
             border-radius: 5px;
             display: none;
         }
+        .avatar-image {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 50%;
+        }
         .cart-section {
             background: #f8f9fa;
             padding: 20px;
             border-radius: 5px;
             margin-bottom: 30px;
         }
+        .cart-item-image {
+            max-width: 50px;
+            max-height: 50px;
+            object-fit: cover;
+        }
+        .remove-from-cart {
+            cursor: pointer;
+        }
+        @media (max-width: 768px) {
+            .cart-section table {
+                font-size: 14px;
+            }
+            .cart-section th, 
+            .cart-section td {
+                padding: 5px;
+            }
+        }
         .table-responsive {
             width: 100%;
             overflow-x: auto;
         }
-        .table th {
+        .table {
+            width: 100%;
+            max-width: 100%;
+            margin-bottom: 1rem;
+            background-color: transparent;
+            border-collapse: collapse;
+        }
+        .table th,
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-top: 1px solid #dee2e6;
+            text-align: left;
+        }
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
             background-color: #8b5e3c;
             color: white;
         }
+        .table tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        .table tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.075);
+        }
+        .table img {
+            vertical-align: middle;
+        }
         .quantity-input {
+            display: inline-block;
             width: 70px;
         }
-        .for-otziv {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 5px;
+        .btn-sm {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            border-radius: 0.2rem;
+        }
+        .star-rating {
+            color: gold;
+            font-size: 1.2em;
         }
     </style>
 </head>
@@ -184,26 +170,13 @@ $reservations = $stmt->fetchAll();
         <div class="kroshka">
             <p><a href="index.php">Главная</a> > <a href="#">Профиль</a></p>
         </div>
-        
-        <?php if (isset($_GET['order_success'])): ?>
-            <div class="alert alert-success">
-                Заказ #<?= htmlspecialchars($_GET['order_success']) ?> успешно оформлен!
-            </div>
-        <?php endif; ?>
-        
-        <?php if (isset($orderError)): ?>
-            <div class="alert alert-danger"><?= htmlspecialchars($orderError) ?></div>
-        <?php endif; ?>
-
         <h1>Профиль</h1>
-        
-        <!-- Информация о пользователе -->
         <div class="profile-card card-t">
             <div class="user-card">
                 <div class="user-card-img">
                     <img src="<?= htmlspecialchars($avatar_path) ?>" alt="Аватар" class="avatar-image">
                     <button type="button" class="btn btn-secondary btn-toggle-upload mt-2">Обновить аватар</button>
-                    
+
                     <div class="avatar-upload-container">
                         <form id="avatarForm" method="POST" enctype="multipart/form-data">
                             <div class="mb-3">
@@ -213,8 +186,8 @@ $reservations = $stmt->fetchAll();
                             <button type="button" class="btn btn-outline-secondary cancel-upload ms-2">Отмена</button>
                         </form>
                     </div>
-                    
-                    <p class="text-custom-1 mt-2"><?= htmlspecialchars($user['username']) ?></p>
+
+                    <p class="text-custom-1 mt-2" id="cart"><?= htmlspecialchars($user['username']) ?></p>
                 </div>
                 <div class="user-card-info">
                     <p><span class="garmond-1">ФИО: </span><?= htmlspecialchars($user['full_name']) ?></p>
@@ -226,647 +199,576 @@ $reservations = $stmt->fetchAll();
                 <a href="logout.php" class="btn btn-danger">Выйти</a>
             </div>
         </div>
+    </div>
+    
+    <!-- Секция корзины -->
+    <div class="cart-section mt-5">
+        <h2>Ваша корзина</h2>
+        <div id="cart-items">
+            <?php
+            $cartItems = [];
+            $total = 0;
 
-        <!-- Корзина -->
-        <div class="cart-section mt-5" id="cart">
-            <h3>Ваша корзина</h3>
-            
-            <?php if (isset($cartError)): ?>
-                <div class="alert alert-danger"><?= htmlspecialchars($cartError) ?></div>
-            <?php elseif (empty($cartItems)): ?>
-                <div class="alert lert-danger">Ваша корзина пуста</div>
-            <?php else: ?>
-                <div class="table-responsive">
-                    <table class="table">
-                        <thead>
+            try {
+                if (isset($_SESSION['user_id'])) {
+                    $stmt = $pdo->prepare("
+                        SELECT c.*, m.title, m.image 
+                        FROM cart c
+                        JOIN menu_items m ON c.menu_item_id = m.id
+                        WHERE c.user_id = ?
+                    ");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $cartItems = $stmt->fetchAll();
+                }
+
+                if (empty($cartItems)) {
+                    echo '<p>Ваша корзина пуста</p>';
+                } else {
+            ?>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Вариант</th>
+                            <th>Цена</th>
+                            <th>Кол-во</th>
+                            <th>Сумма</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($cartItems as $item): 
+                            $itemSum = $item['price'] * $item['quantity'];
+                            $total += $itemSum;
+                        ?>
                             <tr>
-                                <th>Товар</th>
-                                <th>Вариант</th>
-                                <th>Цена</th>
-                                <th>Кол-во</th>
-                                <th>Сумма</th>
-                                <th>Действия</th>
+                                <td>
+                                    <?php if ($item['image']): ?>
+                                        <img src="<?= htmlspecialchars($item['image']) ?>" width="50" class="me-2">
+                                    <?php endif; ?>
+                                    <?= htmlspecialchars($item['title']) ?>
+                                </td>
+                                <td><?= $item['variant_name'] ? htmlspecialchars($item['variant_name']) : '-' ?></td>
+                                <td><?= htmlspecialchars($item['price']) ?> руб.</td>
+                                <td>
+                                    <input type="number" 
+                                        class="form-control quantity-input" 
+                                        value="<?= htmlspecialchars($item['quantity']) ?>" 
+                                        min="1" max="100"
+                                        data-cart-id="<?= $item['id'] ?>"
+                                        data-old-value="<?= htmlspecialchars($item['quantity']) ?>"
+                                        style="width: 70px;">
+                                </td>
+                                <td><?= $itemSum ?> руб.</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger remove-from-cart" 
+                                            data-cart-id="<?= $item['id'] ?>">
+                                        Удалить
+                                    </button>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($cartItems as $item): ?>
-                                <tr>
-                                    <td>
-                                        <?php if ($item['image']): ?>
-                                            <img src="../<?= htmlspecialchars($item['image']) ?>" class="cart-item-image me-2">
-                                        <?php endif; ?>
-                                        <?= htmlspecialchars($item['title']) ?>
-                                    </td>
-                                    <td><?= $item['variant_name'] ? htmlspecialchars($item['variant_name']) : '-' ?></td>
-                                    <td><?= htmlspecialchars($item['price']) ?> руб.</td>
-                                    <td>
-                                        <input type="number" 
-                                               class="form-control quantity-input" 
-                                               value="<?= htmlspecialchars($item['quantity']) ?>" 
-                                               min="1" max="100"
-                                               data-cart-id="<?= $item['id'] ?>"
-                                               data-old-value="<?= htmlspecialchars($item['quantity']) ?>">
-                                    </td>
-                                    <td><?= $item['price'] * $item['quantity'] ?> руб.</td>
-                                    <td>
-                                        <button class="btn btn-sm btn-danger remove-from-cart" 
-                                                data-cart-id="<?= $item['id'] ?>">
-                                            Удалить
-                                        </button>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div class="text-end mt-3">
-                    <h4>Итого: <?= $cartTotal ?> руб.</h4>
-                    <form method="POST">
-                        <div class="text-end mt-3">
-                            <h4>Итого: <?= $cartTotal ?> руб.</h4>
-                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#checkoutModal">
-                                Оформить заказ
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            <?php endif; ?>
-        </div>
-<!-- Модальное окно оформления заказа -->
-<div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="checkoutModalLabel">Оформление заказа</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
-            <form id="orderForm" method="POST">
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Способ получения</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="delivery_type" id="pickup" value="pickup" checked>
-                            <label class="form-check-label" for="pickup">Самовывоз</label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="delivery_type" id="delivery" value="delivery">
-                            <label class="form-check-label" for="delivery">Доставка</label>
-                        </div>
-                    </div>
-                    
-                    <div id="deliveryFields" style="display: none;">
-                        <div class="mb-3">
-                            <label for="delivery_address" class="form-label">Адрес доставки</label>
-                            <input type="text" class="form-control" id="delivery_address" name="delivery_address">
-                        </div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="delivery_time" class="form-label">Желаемое время</label>
-                        <select class="form-select" id="delivery_time" name="delivery_time" required>
-                            <option value="" disabled selected>Выберите время</option>
-                            <?php
-                            // Генерация вариантов времени
-                            $start = strtotime('10:00');
-                            $end = strtotime('20:00');
-                            $interval = 30 * 60; // 30 минут в секундах
-                            
-                            for ($i = $start; $i <= $end; $i += $interval) {
-                                $time = date('H:i', $i);
-                                echo "<option value=\"$time\">$time</option>";
-                            }
-                            ?>
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="customer_notes" class="form-label">Комментарий к заказу</label>
-                        <textarea class="form-control" id="customer_notes" name="customer_notes" rows="3"></textarea>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-                    <button type="submit" name="create_order" class="btn btn-primary">Подтвердить заказ</button>
-                </div>
-            </form>
+
+            <div class="text-end mt-3">
+                <h4>Итого: <?= $total ?> руб.</h4>
+                <button class="btn btn-custom checkout-btn">Оформить заказ</button>
+            </div>
+
+            <?php 
+                } // закрытие else
+            } catch (PDOException $e) {
+                echo '<div class="alert alert-danger">Ошибка при загрузке корзины: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            }
+            ?>
         </div>
     </div>
-</div>
-        <!-- История заказов -->
-        <div class="orders-section mt-5">
+    
+    <!-- Секция бронирований -->
+    <div class="reservations-section mt-5">
+        <h2>Ваши бронирования</h2>
+        <div id="reservations-list">
+            <?php
+            $reservations = [];
             
-            <?php if (isset($ordersError)): ?>
-                <div class="alert alert-danger"><?= htmlspecialchars($ordersError) ?></div>
-                <?php elseif (empty($userOrders)): ?>
-                    <p></p>
-                    <?php else: ?>
-                        <h3>Ваши заказы</h3>
-                <div class="row">
-                    <?php foreach ($userOrders as $order): ?>
-                        <div class="col-md-6 mb-3">
-                            <div class="card order-card order-<?= htmlspecialchars($order['status']) ?>">
-                                <div class="card-body">
-                                    <h5 class="card-title">Заказ #<?= htmlspecialchars($order['id']) ?></h5>
-                                    <p class="card-text">
-                                        <strong>Дата заказа:</strong> <?= date('d.m.Y H:i', strtotime($order['order_date'])) ?><br>
-                                        <strong>Сумма:</strong> <?= htmlspecialchars($order['total_amount']) ?> руб.<br>
-                                        <strong>Способ получения:</strong> 
-                                        <?= isset($order['delivery_type']) && $order['delivery_type'] === 'delivery' ? 'Доставка' : 'Самовывоз' ?><br>
-                                        
-                                        <?php if (isset($order['delivery_type']) && $order['delivery_type'] === 'delivery' && !empty($order['delivery_address'])): ?>
-                                            <strong>Адрес доставки:</strong> <?= htmlspecialchars($order['delivery_address']) ?><br>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (isset($order['delivery_time'])): ?>
-                                            <strong>Время получения:</strong> <?= date('H:i', strtotime($order['delivery_time'])) ?><br>
-                                        <?php endif; ?>
-                                        
-                                        <?php if (!empty($order['customer_notes'])): ?>
-                                            <strong>Комментарий:</strong> <?= htmlspecialchars($order['customer_notes']) ?><br>
-                                        <?php endif; ?>
-                                        
-                                        <strong>Статус:</strong> 
-                                        <span class="order-status text-<?= 
-                                            $order['status'] === 'new' ? 'primary' : 
-                                            ($order['status'] === 'processing' ? 'warning' : 
-                                            ($order['status'] === 'completed' ? 'success' : 
-                                            ($order['status'] === 'cancelled' ? 'danger' : 'info')))
-                                        ?>">
-                                            <?= $order['status'] === 'new' ? 'Новый' : 
-                                            ($order['status'] === 'processing' ? 'В обработке' : 
-                                            ($order['status'] === 'completed' ? 'Завершен' : 
-                                            ($order['status'] === 'cancelled' ? 'Отменен' : 'Отправлен'))) ?>
-                                        </span>
-                                        
-                                        <?php if ($order['status'] === 'cancelled' && !empty($order['cancellation_reason'])): ?>
-                                            <div class="mt-2 alert alert-danger">
-                                                <strong>Причина отмены:</strong> <?= htmlspecialchars($order['cancellation_reason']) ?>
-                                            </div>
-                                        <?php endif; ?>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
+            try {
+                if (isset($_SESSION['user_id'])) {
+                    $stmt = $pdo->prepare("
+                        SELECT * 
+                        FROM reservations 
+                        WHERE user_id = ? 
+                        ORDER BY 
+                            CASE status
+                                WHEN 'cancelled' THEN 4
+                                WHEN 'new' THEN 1
+                                WHEN 'pending' THEN 2
+                                WHEN 'confirmed' THEN 3
+                            END,
+                            date ASC, 
+                            time ASC
+                    ");
+                    $stmt->execute([$_SESSION['user_id']]);
+                    $reservations = $stmt->fetchAll();
+                }
+
+                if (empty($reservations)) {
+                    echo '<p>У вас нет активных бронирований</p>';
+                } else {
+            ?>
+
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Тип</th>
+                            <th>Детали</th>
+                            <th>Дата</th>
+                            <th>Время</th>
+                            <th>Гостей</th>
+                            <th>Статус</th>
+                            <th>Комментарий</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($reservations as $reservation): 
+                            // Форматируем дату и время
+                            $date = date('d.m.Y', strtotime($reservation['date']));
+                            $time = date('H:i', strtotime($reservation['time']));
+                            
+                            // Определяем тип бронирования
+                            $type = $reservation['reservation_type'] == 'table' ? 'Столик' : 'Банкетный зал';
+                            $details = $reservation['reservation_type'] == 'table' 
+                                ? '№' . $reservation['table_number'] 
+                                : ($reservation['event_type'] ? htmlspecialchars($reservation['event_type']) : '-');
+                            
+                            // Определяем стиль строки и статус
+                            $statusText = '';
+                            $badgeClass = '';
+                            switch ($reservation['status']) {
+                                case 'new':
+                                    $statusText = 'Новое';
+                                    $badgeClass = 'bg-primary';
+                                    $rowClass = '';
+                                    break;
+                                case 'pending':
+                                    $statusText = 'В обработке';
+                                    $badgeClass = 'bg-warning text-dark';
+                                    $rowClass = '';
+                                    break;
+                                case 'confirmed':
+                                    $statusText = 'Подтверждено';
+                                    $badgeClass = 'bg-success';
+                                    $rowClass = '';
+                                    break;
+                                case 'cancelled':
+                                    $statusText = 'Отменено';
+                                    $badgeClass = 'bg-danger';
+                                    $rowClass = 'table-secondary';
+                                    break;
+                            }
+                        ?>
+                            <tr class="<?= $rowClass ?>">
+                                <td><?= $type ?></td>
+                                <td><?= $details ?></td>
+                                <td><?= $date ?></td>
+                                <td><?= $time ?></td>
+                                <td><?= $reservation['guests'] ?></td>
+                                <td>
+                                    <span class="badge <?= $badgeClass ?>"><?= $statusText ?></span>
+                                </td>
+                                <td>
+                                    <?php if ($reservation['status'] == 'cancelled' && !empty($reservation['cancel_reason'])): ?>
+                                        <span class="text-danger"><?= htmlspecialchars($reservation['cancel_reason']) ?></span>
+                                    <?php else: ?>
+                                        <?= $reservation['comments'] ? htmlspecialchars($reservation['comments']) : '-' ?>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <?php if ($reservation['status'] != 'cancelled'): ?>
+                                        <button class="btn btn-sm btn-danger cancel-reservation" 
+                                                data-reservation-id="<?= $reservation['id'] ?>">
+                                            Отменить
+                                        </button>
+                                    <?php else: ?>
+                                        <span class="text-muted">Нет действий</span>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <?php 
+                } // закрытие else
+            } catch (PDOException $e) {
+                echo '<div class="alert alert-danger">Ошибка при загрузке бронирований: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            }
+            ?>
+        </div>
+    </div>    
+
+    <div class="for-otziv card-t">
+        <!-- Текст с просьбой оставить отзыв -->
+        <div class="review-invitation mb-4">
+            <p class="lead text-muted" style="font-size: 1.5rem; line-height: 1.6;">
+                Нам очень важно ваше мнение! Поделитесь, пожалуйста, своими впечатлениями — 
+                это поможет нам становиться лучше и мотивирует нашу команду. 
+                Спасибо, что находите время для обратной связи!
+            </p>
+            <!-- Кнопка для открытия формы -->
+            <button id="openReviewForm" class="btn btn-custom" style="font-size: 16px;">Написать отзыв</button>
         </div>
 
-            <div class="cart-section mt-5">
-                <h3>Ваши бронирования</h3>
-                
-                <?php if (empty($reservations)): ?>
-                    <div class="alert lert-danger">У вас нет активных бронирований</div>
-                <?php else: ?>
-                    <?php foreach ($reservations as $reservation): ?>
-                        <div class="card reservation-card status-<?= $reservation['status'] ?>">
-                            <div class="card-body">
-                                <h5 class="card-title">
-                                    <?= $reservation['is_hall'] ? 'Бронирование зала' : 'Бронирование столика' ?>
-                                    <span class="badge bg-<?= $reservation['status'] === 'pending' ? 'warning' : 
-                                        ($reservation['status'] === 'confirmed' ? 'success' : 'danger') ?> float-end">
-                                        <?= $reservation['status'] === 'pending' ? 'Ожидание' : 
-                                            ($reservation['status'] === 'confirmed' ? 'Подтверждено' : 'Отменено') ?>
-                                    </span>
-                                </h5>
-                                <p class="card-text">
-                                    <strong>Дата:</strong> <?= date('d.m.Y', strtotime($reservation['date'])) ?><br>
-                                    <strong>Время:</strong> <?= substr($reservation['time'], 0, 5) ?><br>
-                                    <?php if (!$reservation['is_hall']): ?>
-                                        <strong>Столик:</strong> <?= ($reservation['table_number'] ?? 0) + 1 ?><br>
-                                    <?php endif; ?>
-                                    <strong>Гостей:</strong> <?= $reservation['guests'] ?><br>
-                                    <strong>Телефон:</strong> <?= htmlspecialchars($reservation['phone']) ?>
-                                </p>
-                                <?php if ($reservation['status'] === 'pending'): ?>
-                                    <form method="post" action="cancel_booking.php" style="display: inline;">
-                                        <input type="hidden" name="id" value="<?= $reservation['id'] ?>">
-                                        <button type="submit" class="btn btn-danger btn-sm">Отменить бронь</button>
-                                    </form>
-                                <?php endif; ?>
-                            </div>
+        <!-- Скрытый div с формой -->
+        <div id="reviewFormContainer" style="display: none; margin-top: 20px;">
+            <div class="card-t">
+                <div class="card-body">
+                    <h5 class="card-title">Оставить отзыв</h5>
+                    <form id="reviewForm" method="POST">
+                        <div class="mb-3">
+                            <label for="reviewText" class="form-label">Ваш отзыв</label>
+                            <textarea class="form-control" id="reviewText" name="reviewText" rows="3" required 
+                                      placeholder="Напишите здесь ваши впечатления..."></textarea>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-
-        <!-- Блок отзывов -->
-        <div class="for-otziv card-t mt-4">
-            <div class="card-body">
-                
-                <div class="review-invitation mb-4">
-                    <p class="lead text-muted" style="font-size: 1.5rem; line-height: 1.6;">
-                        Нам очень важно ваше мнение! Поделитесь, пожалуйста, своими впечатлениями — 
-                        это поможет нам становиться лучше и мотивирует нашу команду. 
-                        Спасибо, что находите время для обратной связи!
-                    </p>
-                </div>
-
-                <button id="openReviewForm" class="btn btn-custom" style="font-size: 16px;">Написать отзыв</button>
-
-                <div id="reviewFormContainer" style="display: none; margin-top: 20px;">
-                    <div class="card">
-                        <div class="card-body">
-                            <h5 class="card-title">Оставить отзыв</h5>
-                            <form id="reviewForm" method="POST">
-                                <div class="mb-3">
-                                    <label for="reviewText" class="form-label">Ваш отзыв</label>
-                                    <textarea class="form-control" id="reviewText" name="reviewText" rows="3" required 
-                                              placeholder="Напишите здесь ваши впечатления..."></textarea>
-                                </div>
-                                <div class="mb-3">
-                                    <label for="reviewRating" class="form-label">Оценка (1-5)</label>
-                                    <select class="form-select" id="reviewRating" name="reviewRating" required>
-                                        <option value="" selected disabled>Выберите оценку</option>
-                                        <option value="5">5 - Отлично</option>
-                                        <option value="4">4 - Хорошо</option>
-                                        <option value="3">3 - Удовлетворительно</option>
-                                        <option value="2">2 - Плохо</option>
-                                        <option value="1">1 - Очень плохо</option>
-                                    </select>
-                                </div>
-                                <button type="submit" class="btn btn-success">Отправить отзыв</button>
-                                <button type="button" id="cancelReview" class="btn btn-outline-secondary">Отмена</button>
-                            </form>
+                        <div class="mb-3">
+                            <label for="reviewRating" class="form-label">Оценка (1-5)</label>
+                            <select class="form-select" id="reviewRating" name="reviewRating" required>
+                                <option value="" selected disabled>Выберите оценку</option>
+                                <option value="5">5 - Отлично</option>
+                                <option value="4">4 - Хорошо</option>
+                                <option value="3">3 - Удовлетворительно</option>
+                                <option value="2">2 - Плохо</option>
+                                <option value="1">1 - Очень плохо</option>
+                            </select>
                         </div>
-                    </div>
+                        <button type="submit" class="btn btn-success">Отправить отзыв</button>
+                        <button type="button" id="cancelReview" class="btn btn-outline-secondary">Отмена</button>
+                    </form>
                 </div>
-
-
             </div>
+        </div>
+
+        <!-- Секция для отображения отзывов пользователя -->
+        <div id="userReviews" class="mt-5">
+            <h3>Ваши отзывы</h3>
+            <div class="reviews-list"></div>
         </div>
     </div>
 </main>
 
 <?php include 'components/footer.php'; ?>
 
-    <!-- Подключите Bootstrap 5 JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script src="js/script-modal.js"></script>
 
-    <script src="js/script.js"></script>
-    <script src="js/script-modal.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Общие элементы
-        const cartTable = document.getElementById('cart');
-        const reviewForm = document.getElementById('reviewForm');
-        const orderForm = document.getElementById('orderForm');
-        
-        // Обработчик удаления из корзины
-        if (cartTable) {
-            cartTable.addEventListener('click', async function(e) {
-                if (e.target.classList.contains('remove-from-cart')) {
-                    e.preventDefault();
-                    const cartId = e.target.dataset.cartId;
-                    
-                    if (!confirm('Вы уверены, что хотите удалить товар из корзины?')) {
-                        return;
-                    }
+$(document).ready(function() {
+    // Переключение формы загрузки аватара
+    $('.btn-toggle-upload').click(function() {
+        $('.avatar-upload-container').toggle();
+    });
+    
+    $('.cancel-upload').click(function() {
+        $('.avatar-upload-container').hide();
+        $('#avatarForm')[0].reset();
+    });
 
-                    try {
-                        const response = await fetch(`components/remove_from_cart.php?id=${cartId}`);
-                        const result = await response.json();
-                        
-                        if (result.status === 'success') {
-                            const row = e.target.closest('tr');
-                            row.style.transition = 'opacity 0.3s ease';
-                            row.style.opacity = '0';
-                            
-                            setTimeout(() => {
-                                row.remove();
-                                updateTotalSum();
-                                showToast('Товар удален из корзины', 'success');
-                            }, 300);
-                        } else {
-                            showToast(`Ошибка: ${result.message}`, 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('Произошла ошибка при удалении товара', 'error');
-                    }
-                }
+    // Обработчик удаления товара
+    $(document).on('click', '.remove-from-cart', async function(e) {
+        e.preventDefault();
+        const cartId = $(this).data('cart-id');
+
+        try {
+            const response = await fetch(`components/remove_from_cart.php?id=${cartId}`);
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                // Плавное исчезновение строки
+                $(this).closest('tr').css({
+                    'transition': 'opacity 0.3s',
+                    'opacity': '0'
+                });
+
+                // Обновление через 300мс
+                setTimeout(() => {
+                    location.reload();
+                }, 300);
+            } else {
+                alert(`Ошибка: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Произошла ошибка при удалении товара');
+        }
+    });
+
+    // Обработчик изменения количества
+    $(document).on('change', '.quantity-input', async function() {
+        const input = $(this);
+        const cartId = input.data('cart-id');
+        const newQuantity = parseInt(input.val());
+        const oldValue = parseInt(input.data('old-value'));
+
+        // Валидация
+        if (isNaN(newQuantity) || newQuantity < 1 || newQuantity > 100) {
+            alert('Количество должно быть от 1 до 100');
+            input.val(oldValue);
+            return;
+        }
+
+        try {
+            const response = await fetch('components/update_cart.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    cart_id: cartId,
+                    quantity: newQuantity
+                })
             });
 
-            // Обработчик изменения количества
-            cartTable.addEventListener('change', debounce(async function(e) {
-                if (e.target.classList.contains('quantity-input')) {
-                    const input = e.target;
-                    const cartId = input.dataset.cartId;
-                    const newQuantity = parseInt(input.value);
-                    const oldValue = parseInt(input.dataset.oldValue);
+            const result = await response.json();
 
-                    // Валидация
-                    if (isNaN(newQuantity) || newQuantity < 1 || newQuantity > 100) {
-                        showToast('Количество должно быть от 1 до 100', 'warning');
-                        input.value = oldValue;
-                        return;
-                    }
+            if (result.status === 'success') {
+                // Обновляем старую цену
+                input.data('old-value', newQuantity);
 
-                    try {
-                        const response = await fetch('components/update_cart.php', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                cart_id: cartId,
-                                quantity: newQuantity
-                            })
-                        });
-                        
-                        const result = await response.json();
-                        
-                        if (result.status === 'success') {
-                            input.dataset.oldValue = newQuantity;
-                            updateRowTotal(input);
-                            updateTotalSum();
-                            showToast('Количество обновлено', 'success');
-                        } else {
-                            showToast(`Ошибка: ${result.message}`, 'error');
-                            input.value = oldValue;
+                // Пересчитываем сумму
+                const row = input.closest('tr');
+                const price = parseFloat(row.find('td:nth-child(3)').text());
+                const sumCell = row.find('td:nth-child(5)');
+                sumCell.text((price * newQuantity).toFixed(2) + ' руб.');
+
+                // Пересчитываем общую сумму
+                updateTotalSum();
+            } else {
+                alert(`Ошибка: ${result.message}`);
+                input.val(oldValue);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Произошла ошибка при обновлении количества');
+            input.val(oldValue);
+        }
+    });
+
+    // Функция для пересчета общей суммы
+    function updateTotalSum() {
+        let total = 0;
+        $('#cart-items tbody tr').each(function() {
+            const sumText = $(this).find('td:nth-child(5)').text();
+            total += parseFloat(sumText);
+        });
+
+        $('.checkout-btn').prev().html(`Итого: ${total.toFixed(2)} руб.`);
+    }
+
+    // Обработчик оформления заказа
+    $('.checkout-btn').click(function() {
+        alert('Функционал оформления заказа будет реализован позже');
+    });
+
+    // Управление формой отзыва
+    $('#openReviewForm').click(function() {
+        $('#reviewFormContainer').show();
+        $(this).hide();
+    });
+
+    $('#cancelReview').click(function() {
+        $('#reviewFormContainer').hide();
+        $('#openReviewForm').show();
+        $('#reviewForm')[0].reset();
+    });
+
+    // Отправка формы отзыва
+    $('#reviewForm').submit(function(e) {
+        e.preventDefault();
+
+        const formData = new FormData(this);
+        formData.append('action', 'submit_review');
+
+        fetch('modal/handle_review.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Отзыв успешно отправлен!');
+                $('#reviewFormContainer').hide();
+                $('#openReviewForm').show();
+                this.reset();
+                loadUserReviews();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Произошла ошибка при отправке отзыва');
+        });
+    });
+
+    // Функция для загрузки отзывов пользователя
+    function loadUserReviews() {
+        fetch('modal/handle_review.php?action=get_reviews')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const reviewsContainer = $('.reviews-list');
+                reviewsContainer.empty();
+
+                if (data.reviews.length > 0) {
+                    const table = $('<table>').addClass('table table-striped');
+                    const thead = $('<thead>').html(`
+                        <tr>
+                            <th>Дата</th>
+                            <th>Отзыв</th>
+                            <th>Оценка</th>
+                            <th>Действия</th>
+                        </tr>
+                    `);
+                    table.append(thead);
+
+                    const tbody = $('<tbody>');
+                    data.reviews.forEach(review => {
+                        const row = $('<tr>').html(`
+                            <td>${new Date(review.created_at).toLocaleString()}</td>
+                            <td>${review.review_text}</td>
+                            <td><span class="star-rating">${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</span></td>
+                            <td><button class="btn btn-sm btn-danger delete-review" data-id="${review.id}">Удалить</button></td>
+                        `);
+                        tbody.append(row);
+                    });
+
+                    table.append(tbody);
+                    reviewsContainer.append(table);
+
+                    // Добавляем обработчики для кнопок удаления
+                    $('.delete-review').click(function() {
+                        if (confirm('Вы уверены, что хотите удалить этот отзыв?')) {
+                            deleteReview($(this).data('id'));
                         }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('Произошла ошибка при обновлении количества', 'error');
-                        input.value = oldValue;
-                    }
-                }
-            }, 500));
-        }
-
-        // Функция для обновления суммы в строке
-        function updateRowTotal(input) {
-            const row = input.closest('tr');
-            const price = parseFloat(row.querySelector('.item-price').textContent);
-            const sumCell = row.querySelector('.item-total');
-            sumCell.textContent = (price * input.value).toFixed(2) + ' руб.';
-        }
-
-        // Функция для пересчета общей суммы
-        function updateTotalSum() {
-            let total = 0;
-            document.querySelectorAll('.item-total').forEach(cell => {
-                total += parseFloat(cell.textContent);
-            });
-            
-            const totalElement = document.querySelector('.cart-total');
-            if (totalElement) {
-                totalElement.textContent = `Итого: ${total.toFixed(2)} руб.`;
-            }
-        }
-
-        // Обработчики для формы отзывов
-        if (reviewForm) {
-            const openBtn = document.getElementById('openReviewForm');
-            const formContainer = document.getElementById('reviewFormContainer');
-            const cancelBtn = document.getElementById('cancelReview');
-            
-            if (openBtn && formContainer && cancelBtn) {
-                // Открытие формы
-                openBtn.addEventListener('click', function() {
-                    formContainer.classList.remove('d-none');
-                    openBtn.classList.add('d-none');
-                });
-                
-                // Закрытие формы
-                cancelBtn.addEventListener('click', function() {
-                    formContainer.classList.add('d-none');
-                    openBtn.classList.remove('d-none');
-                    reviewForm.reset();
-                });
-                
-                // Отправка формы
-                reviewForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    
-                    const submitBtn = this.querySelector('button[type="submit"]');
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Отправка...';
-                    
-                    try {
-                        const formData = new FormData(this);
-                        formData.append('action', 'submit_review');
-                        
-                        const response = await fetch('modal/handle_review.php', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        
-                        const data = await response.json();
-                        
-                        if (data.success) {
-                            showToast('Отзыв успешно отправлен!', 'success');
-                            formContainer.classList.add('d-none');
-                            openBtn.classList.remove('d-none');
-                            this.reset();
-                            loadUserReviews();
-                        } else {
-                            showToast('Ошибка: ' + data.message, 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        showToast('Произошла ошибка при отправке отзыва', 'error');
-                    } finally {
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = 'Отправить отзыв';
-                    }
-                });
-            }
-        }
-
-        // Функция для загрузки отзывов пользователя
-        async function loadUserReviews() {
-            const reviewsContainer = document.getElementById('userReviews');
-            if (!reviewsContainer) return;
-
-            try {
-                const response = await fetch(`modal/handle_review.php?action=get_reviews&user_id=${reviewsContainer.dataset.userId}`);
-                const data = await response.json();
-                
-                if (data.success) {
-                    reviewsContainer.innerHTML = '';
-                    
-                    if (data.reviews.length > 0) {
-                        const table = document.createElement('table');
-                        table.className = 'table table-striped';
-                        
-                        table.innerHTML = `
-                            <thead>
-                                <tr>
-                                    <th>Дата</th>
-                                    <th>Отзыв</th>
-                                    <th>Оценка</th>
-                                    <th>Действия</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${data.reviews.map(review => `
-                                    <tr>
-                                        <td>${new Date(review.created_at).toLocaleString()}</td>
-                                        <td>${escapeHtml(review.review_text)}</td>
-                                        <td>${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</td>
-                                        <td>
-                                            <button class="btn btn-sm btn-danger delete-review" data-id="${review.id}">
-                                                <i class="bi bi-trash"></i> Удалить
-                                            </button>
-                                        </td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        `;
-                        
-                        reviewsContainer.appendChild(table);
-                        
-                        // Обработчики для кнопок удаления
-                        document.querySelectorAll('.delete-review').forEach(btn => {
-                            btn.addEventListener('click', function() {
-                                if (confirm('Вы уверены, что хотите удалить этот отзыв?')) {
-                                    deleteReview(this.dataset.id);
-                                }
-                            });
-                        });
-                    } else {
-                        reviewsContainer.innerHTML = '<div class="alert alert-info">У вас пока нет отзывов.</div>';
-                    }
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                reviewsContainer.innerHTML = '<div class="alert alert-danger">Не удалось загрузить отзывы</div>';
-            }
-        }
-        
-        // Функция для удаления отзыва
-        async function deleteReview(reviewId) {
-            try {
-                const response = await fetch('modal/handle_review.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'delete_review',
-                        review_id: reviewId
-                    })
-                });
-                
-                const data = await response.json();
-                
-                if (data.success) {
-                    showToast('Отзыв удален', 'success');
-                    loadUserReviews();
+                    });
                 } else {
-                    showToast('Ошибка: ' + data.message, 'error');
+                    reviewsContainer.html('<p>У вас пока нет отзывов.</p>');
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                showToast('Произошла ошибка при удалении отзыва', 'error');
             }
-        }
-
-        // Обработка формы заказа
-        if (orderForm) {
-            // Показ/скрытие полей адреса доставки
-            document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    document.getElementById('deliveryFields').style.display = 
-                        this.value === 'delivery' ? 'block' : 'none';
-                });
-            });
-
-            // Валидация перед отправкой
-            orderForm.addEventListener('submit', function(e) {
-                const deliveryType = document.querySelector('input[name="delivery_type"]:checked')?.value;
-                const deliveryTime = document.getElementById('delivery_time').value;
-                
-                if (!deliveryTime) {
-                    e.preventDefault();
-                    showToast('Пожалуйста, выберите время получения заказа', 'warning');
-                    return;
-                }
-                
-                if (deliveryType === 'delivery' && !document.getElementById('delivery_address').value.trim()) {
-                    e.preventDefault();
-                    showToast('Пожалуйста, укажите адрес доставки', 'warning');
-                    return;
-                }
-            });
-        }
-
-        // Вспомогательные функции
-        function showToast(message, type = 'info') {
-            // Реализация toast-уведомлений (зависит от вашей библиотеки)
-            console.log(`${type.toUpperCase()}: ${message}`);
-            // Пример для Bootstrap:
-            const toast = new bootstrap.Toast(document.getElementById('liveToast'));
-            document.getElementById('toastMessage').textContent = message;
-            document.getElementById('liveToast').className = `toast align-items-center text-white bg-${type} border-0`;
-            toast.show();
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func.apply(this, args), wait);
-            };
-        }
-
-        function escapeHtml(unsafe) {
-            return unsafe
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")
-                .replace(/"/g, "&quot;")
-                .replace(/'/g, "&#039;");
-        }
-
-        // Инициализация
-        if (document.getElementById('userReviews')) {
-            loadUserReviews();
-        }
-    });    
-</script>
-
-<?php
-// Обработка загрузки аватара
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['avatar'])) {
-    $uploadDir = __DIR__ . '/img/uploads/avatar/';
-    
-    // Создаем директорию, если ее нет
-    if (!file_exists($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
+        });
     }
-    
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    $fileType = $_FILES['avatar']['type'];
-    
-    if (!in_array($fileType, $allowedTypes)) {
-        die("Недопустимый тип файла. Разрешены только JPEG, PNG и GIF.");
+
+    // Функция для удаления отзыва
+    function deleteReview(reviewId) {
+        const formData = new FormData();
+        formData.append('action', 'delete_review');
+        formData.append('review_id', reviewId);
+
+        fetch('modal/handle_review.php', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Отзыв удален');
+                loadUserReviews();
+            } else {
+                alert('Ошибка: ' + data.message);
+            }
+        });
     }
+
+    // Загружаем отзывы при загрузке страницы
+    loadUserReviews();
+});
+
+// Обработчик отмены бронирования
+$(document).on('click', '.cancel-reservation', function() {
+    const reservationId = $(this).data('reservation-id');
     
-    // Генерируем уникальное имя файла
-    $extension = pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION);
-    $newFileName = 'avatar_' . $_SESSION['user_id'] . '_' . time() . '.' . $extension;
-    $uploadPath = $uploadDir . $newFileName;
+    // Создаем модальное окно Bootstrap для подтверждения
+    const modalHTML = `
+        <div class="modal fade" id="cancelReservationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Отмена бронирования</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="cancelReason" class="form-label">Причина отмены</label>
+                            <textarea class="form-control" id="cancelReason" rows="3" placeholder="Укажите причину отмены"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="button" class="btn btn-danger" id="confirmCancel">Подтвердить отмену</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
     
-    if (move_uploaded_file($_FILES['avatar']['tmp_name'], $uploadPath)) {
-        // Обновляем путь в базе данных
-        $relativePath = 'img/uploads/avatar/' . $newFileName;
-        $stmt = $pdo->prepare("UPDATE users SET avatar_path = ? WHERE id = ?");
-        $stmt->execute([$relativePath, $_SESSION['user_id']]);
+    $('body').append(modalHTML);
+    const modal = new bootstrap.Modal(document.getElementById('cancelReservationModal'));
+    modal.show();
+    
+    // Обработчик подтверждения отмены
+    $('#confirmCancel').on('click', async function() {
+        const reason = $('#cancelReason').val().trim() || 'Отменено пользователем';
         
-        // Обновляем сессию и перезагружаем страницу
-        $_SESSION['avatar_path'] = $relativePath;
-        header("Location: profile.php");
-        exit;
-    } else {
-        die("Ошибка при загрузке файла.");
-    }
-}
-?>
+        try {
+            const response = await fetch('components/cancel_reservation.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    reservation_id: reservationId,
+                    reason: reason
+                })
+            });
+            
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                modal.hide();
+                $('#cancelReservationModal').remove();
+                
+                // Плавное исчезновение строки
+                $(`button[data-reservation-id="${reservationId}"]`).closest('tr').css({
+                    'transition': 'opacity 0.3s',
+                    'opacity': '0'
+                });
+
+                // Обновление через 300мс
+                setTimeout(() => {
+                    location.reload();
+                }, 300);
+            } else {
+                alert(`Ошибка: ${result.message}`);
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Произошла ошибка при отмене бронирования');
+        }
+    });
+    
+    // Удаляем модальное окно при закрытии
+    $('#cancelReservationModal').on('hidden.bs.modal', function () {
+        $(this).remove();
+    });
+});
+</script>
 </body>
 </html>
