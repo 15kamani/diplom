@@ -325,9 +325,6 @@ try {
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
-                                <?php if (!empty($item['image'])): ?>
-                                    <img src="../<?= htmlspecialchars($item['image']) ?>" class="img-fluid mb-3" alt="<?= htmlspecialchars($item['title']) ?>">
-                                <?php endif; ?>
                                 
                                 <p><?= nl2br(htmlspecialchars($item['full_desc'] ?: $item['short_desc'])) ?></p>
                                 

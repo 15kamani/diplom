@@ -2,7 +2,216 @@
 session_start();
 require_once '../components/db_connect.php';
 
-$isAuthenticated = isset($_SESSION['user_id']);
+// Упрощенная проверка аутентификации
+$userLoggedIn = isset($_SESSION['user_id']);
+
+// Обработка бронирования
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reservation_type'])) {
+    $errors = validateBookingData($_POST, $userLoggedIn);
+    
+    if (empty($errors)) {
+        $result = saveBooking($_POST, $userLoggedIn);
+        if ($result['success']) {
+            echo json_encode($result);
+            exit;
+        }
+        $errors[] = $result['message'];
+    }
+    
+    echo json_encode([
+        'success' => false,
+        'message' => implode('<br>', $errors)
+    ]);
+    exit;
+}
+
+// Проверка доступности
+if (isset($_GET['date'])) {
+    checkAvailability($_GET);
+    exit;
+}
+
+// Основные функции
+function validateBookingData($data, $isAuthenticated) {
+    global $pdo;
+    $errors = [];
+    $requiredFields = ['date', 'time', 'guests'];
+    
+    // Проверка обязательных полей
+    foreach ($requiredFields as $field) {
+        if (empty($data[$field])) $errors[] = "Поле {$field} обязательно для заполнения";
+    }
+    
+    // Валидация типа бронирования
+    if ($data['reservation_type'] === 'table') {
+        if (!isset($data['tableNumber'])) $errors[] = 'Не выбран столик';
+        if ($data['tableNumber'] == 4 && $data['guests'] > 4) {
+            $errors[] = 'Столик 4 вмещает только 4 гостя';
+        } elseif ($data['tableNumber'] != 4 && $data['guests'] > 6) {
+            $errors[] = 'Столики 1-3 вмещают только 6 гостей';
+        }
+
+        // Проверка на бронь зала на эту дату
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+            WHERE date = ? AND reservation_type = 'hall'");
+        $stmt->execute([$data['date']]);
+        if ($stmt->fetchColumn() > 0) {
+            $errors[] = 'На выбранную дату забронирован зал, бронь столиков невозможна';
+        }
+
+        // Проверка на занятость столика
+        if (!isset($errors['tableNumber'])) {
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+                WHERE date = ? 
+                AND reservation_type = 'table' 
+                AND table_number = ?
+                AND ABS(TIMEDIFF(time, ?)) < '02:00:00'");
+            $stmt->execute([$data['date'], $data['tableNumber'], $data['time']]);
+            if ($stmt->fetchColumn() > 0) {
+                $errors[] = 'Этот столик уже забронирован на выбранное время';
+            }
+        }
+        
+    } elseif ($data['reservation_type'] === 'hall') {
+        if ($data['guests'] > 80) {
+            $errors[] = 'Зал вмещает максимум 80 гостей';
+        }
+
+        // Проверка на брони столиков на эту дату
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+            WHERE date = ? AND reservation_type = 'table'");
+        $stmt->execute([$data['date']]);
+        if ($stmt->fetchColumn() > 0) {
+            $errors[] = 'На выбранную дату есть брони столиков, бронь зала невозможна';
+        }
+
+        // Проверка на бронь зала
+        $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+            WHERE date = ? AND reservation_type = 'hall'");
+        $stmt->execute([$data['date']]);
+        if ($stmt->fetchColumn() > 0) {
+            $errors[] = 'Зал уже забронирован на выбранную дату';
+        }
+    }
+    
+    // Проверка данных для неавторизованных пользователей
+    if (!$isAuthenticated) {
+        if (empty($data['name'])) $errors[] = 'Имя обязательно';
+        if (empty($data['phone'])) $errors[] = 'Телефон обязателен';
+        if ($data['reservation_type'] === 'hall' && (empty($data['email']) || !filter_var($data['email'], FILTER_VALIDATE_EMAIL))) {
+            $errors[] = 'Введите корректный email';
+        }
+    }
+    
+    return $errors;
+}
+
+function saveBooking($data, $isAuthenticated) {
+    global $pdo;
+    
+    try {
+        $stmt = $pdo->prepare("INSERT INTO reservations 
+            (user_id, reservation_type, table_number, name, phone, email, event_type, guests, date, time, comments) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        
+        $stmt->execute([
+            $isAuthenticated ? $_SESSION['user_id'] : null,
+            $data['reservation_type'],
+            $data['tableNumber'] ?? null,
+            $data['name'] ?? null,
+            $data['phone'] ?? null,
+            $data['email'] ?? null,
+            $data['eventType'] ?? null,
+            $data['guests'],
+            $data['date'],
+            $data['time'],
+            $data['comments'] ?? null
+        ]);
+        
+        return [
+            'success' => true,
+            'message' => $data['reservation_type'] === 'table' ? 'Столик забронирован!' : 'Зал забронирован!',
+            'reservationId' => $pdo->lastInsertId()
+        ];
+    } catch (PDOException $e) {
+        return [
+            'success' => false,
+            'message' => 'Ошибка при бронировании: ' . $e->getMessage()
+        ];
+    }
+}
+
+function checkAvailability($params) {
+    global $pdo;
+    
+    try {
+        if (isset($params['time']) && isset($params['table_number'])) {
+            // Проверка конкретного столика на дату и время
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+                WHERE date = :date 
+                AND (
+                    (reservation_type = 'table' 
+                    AND table_number = :table_number
+                    AND ABS(TIMEDIFF(time, :time)) < '02:00:00')
+                    OR
+                    (reservation_type = 'hall')
+                )");
+            $stmt->execute([
+                'date' => $params['date'],
+                'time' => $params['time'],
+                'table_number' => $params['table_number']
+            ]);
+            $isBooked = $stmt->fetchColumn() > 0;
+            echo json_encode(['isBooked' => $isBooked]);
+            
+        } elseif (isset($params['time'])) {
+            // Проверка всех столиков на дату и время
+            $stmt = $pdo->prepare("SELECT table_number FROM reservations 
+                WHERE reservation_type = 'table' 
+                AND date = :date 
+                AND ABS(TIMEDIFF(time, :time)) < '02:00:00'");
+            $stmt->execute([
+                'date' => $params['date'],
+                'time' => $params['time']
+            ]);
+            $bookedTables = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            
+            // Проверка, не забронирован ли зал на эту дату
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+                WHERE reservation_type = 'hall' 
+                AND date = :date");
+            $stmt->execute(['date' => $params['date']]);
+            $isHallBooked = $stmt->fetchColumn() > 0;
+            
+            echo json_encode([
+                'bookedTables' => $bookedTables,
+                'isHallBooked' => $isHallBooked
+            ]);
+            
+        } else {
+            // Проверка только зала на дату
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+                WHERE date = :date 
+                AND reservation_type = 'hall'");
+            $stmt->execute(['date' => $params['date']]);
+            $isHallBooked = $stmt->fetchColumn() > 0;
+            
+            // Проверка, есть ли брони столиков на эту дату
+            $stmt = $pdo->prepare("SELECT COUNT(*) FROM reservations 
+                WHERE date = :date 
+                AND reservation_type = 'table'");
+            $stmt->execute(['date' => $params['date']]);
+            $hasTableBookings = $stmt->fetchColumn() > 0;
+            
+            echo json_encode([
+                'isHallBooked' => $isHallBooked,
+                'hasTableBookings' => $hasTableBookings
+            ]);
+        }
+    } catch (PDOException $e) {
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -95,22 +304,22 @@ $isAuthenticated = isset($_SESSION['user_id']);
             </div>
             <div class="modal-body">
                 <div class="room-layout">
-                    <div class="table table-1" data-table="0">
+                    <div class="table table-1" data-table="1">
                         <img src="../img/booking/chear.png" alt="" class="chear-1">
                         <span>Столик 1</span>
                         <img src="../img/booking/chear.png" alt="" class="chear-2">
                     </div>
-                    <div class="table table-2" data-table="1">
+                    <div class="table table-2" data-table="2">
                         <img src="../img/booking/chear.png" alt="" class="chear-1">
                         <span>Столик 2</span>
                         <img src="../img/booking/chear.png" alt="" class="chear-2">
                     </div>
-                    <div class="table table-3" data-table="2">
+                    <div class="table table-3" data-table="3">
                         <img src="../img/booking/chear.png" alt="" class="chear-1">
                         <span>Столик 3</span>
                         <img src="../img/booking/chear.png" alt="" class="chear-2">
                     </div>
-                    <div class="table table-entrance" data-table="3">
+                    <div class="table table-entrance" data-table="4">
                         <img src="../img/booking/chear.png" alt="" class="chear-3 c3-1">
                         <img src="../img/booking/chear.png" alt="" class="chear-3 c3-2">
                         <img src="../img/booking/chear.png" alt="" class="chear-3 c3-3">
@@ -118,23 +327,24 @@ $isAuthenticated = isset($_SESSION['user_id']);
                         <span>Столик 4</span>
                     </div>
                 </div>
-                    <?php if (!isset($_SESSION['user_id'])): ?>
-                        <div class="mb-3">
-                            <h4>При бронировании столика без входа в аккаунт, ожидайте звонка от менеджера.</h4>
-                            <p>Для сохранения истории бронирования <a href="#" data-bs-target="#registerModal" data-bs-toggle="modal">создайте</a> или <a href="#" data-bs-target="#LoginModal" data-bs-toggle="modal">войдите</a> в аккаунт.</p>
-                        </div>
-                    <?php endif; ?>
-                    
-                <form id="bookingForm" action="../components/booking_handler.php" method="POST">
+                
+                <?php if (!isset($_SESSION['user_id'])): ?>
+                    <div class="mb-3">
+                        <h4>При бронировании столика без входа в аккаунт, ожидайте звонка от менеджера.</h4>
+                        <p>Для сохранения истории бронирования <a href="#" data-bs-target="#registerModal" data-bs-toggle="modal">создайте</a> или <a href="#" data-bs-target="#LoginModal" data-bs-toggle="modal">войдите</a> в аккаунт.</p>
+                    </div>
+                <?php endif; ?>
+                
+                <form id="bookingForm" method="POST">
                     <input type="hidden" name="reservation_type" value="table">
                     
                     <div class="mb-3">
                         <label for="tableNumber" class="form-label garmond-1">Выберите столик:</label>
                         <select class="form-select garmond-0" name="tableNumber" id="tableNumber" required>
-                            <option value="0">Столик 1</option>
-                            <option value="1">Столик 2</option>
-                            <option value="2">Столик 3</option>
-                            <option value="3">Столик 4</option>
+                            <option value="1">Столик 1</option>
+                            <option value="2">Столик 2</option>
+                            <option value="3">Столик 3</option>
+                            <option value="4">Столик 4</option>
                         </select>
                     </div>
                     
@@ -185,14 +395,14 @@ $isAuthenticated = isset($_SESSION['user_id']);
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                    <?php if (!isset($_SESSION['user_id'])): ?>
-                        <div class="mb-3">
-                            <h4>При бронировании зала без входа в аккаунт, ожидайте звонка от менеджера.</h4>
-                            <p>Для сохранения истории бронирования <a href="#" data-bs-target="#registerModal" data-bs-toggle="modal">создайте</a> или <a href="#" data-bs-target="#LoginModal" data-bs-toggle="modal">войдите</a> в аккаунт.</p>
-                        </div>
-                    <?php endif; ?>                
-                <!-- Форма бронирования зала -->
-                <form id="bookingHallForm" action="../components/booking_handler.php" method="POST">
+                <?php if (!isset($_SESSION['user_id'])): ?>
+                    <div class="mb-3">
+                        <h4>При бронировании зала без входа в аккаунт, ожидайте звонка от менеджера.</h4>
+                        <p>Для сохранения истории бронирования <a href="#" data-bs-target="#registerModal" data-bs-toggle="modal">создайте</a> или <a href="#" data-bs-target="#LoginModal" data-bs-toggle="modal">войдите</a> в аккаунт.</p>
+                    </div>
+                <?php endif; ?>
+                
+                <form id="bookingHallForm" method="POST">
                     <input type="hidden" name="reservation_type" value="hall">
                     
                     <?php if (!isset($_SESSION['user_id'])): ?>
@@ -223,7 +433,7 @@ $isAuthenticated = isset($_SESSION['user_id']);
                     
                     <div class="mb-3">
                         <label for="guests" class="form-label garmond-1">Количество гостей:</label>
-                        <input type="number" class="form-control" name="guests" id="hallGuests" min="1" max="80" required>
+                        <input type="number" class="form-control" name="guests" id="hallGuests" min="1" max="30" required>
                     </div>
                     
                     <div class="mb-3">
@@ -267,202 +477,142 @@ $isAuthenticated = isset($_SESSION['user_id']);
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Общие элементы
-        const tables = document.querySelectorAll(".table");
-        const tableNumberSelect = document.getElementById("tableNumber");
-        const guestsInput = document.getElementById("guests");
-        const dateInput = document.getElementById("date");
-        const timeInput = document.getElementById("time");
+        // Основные элементы
+        const elements = {
+            tables: document.querySelectorAll(".table"),
+            tableSelect: document.getElementById("tableNumber"),
+            guestsInput: document.getElementById("guests"),
+            dateInput: document.getElementById("date"),
+            timeInput: document.getElementById("time"),
+            bookingForm: document.getElementById('bookingForm'),
+            hallForm: document.getElementById('bookingHallForm')
+        };
 
-        // Инициализация при загрузке
+        // Инициализация
         initTableSelection();
-        initFormSubmissions();
-        if (dateInput && timeInput) initAvailabilityChecks();
+        initForms();
+        if (elements.dateInput && elements.timeInput) initAvailabilityChecks();
 
-        // Функция инициализации выбора столиков
         function initTableSelection() {
-            if (!tables.length || !tableNumberSelect || !guestsInput) return;
+            if (!elements.tables.length) return;
             
-            tables.forEach(table => {
-                table.addEventListener("click", function() {
-                    const tableId = this.getAttribute("data-table");
-                    tableNumberSelect.value = tableId;
-                    guestsInput.max = tableId === "3" ? 4 : 6;
+            elements.tables.forEach(table => {
+                table.addEventListener("click", () => {
+                    const tableId = table.dataset.table;
+                    elements.tableSelect.value = tableId;
+                    elements.guestsInput.max = tableId === "4" ? 4 : 6;
                     
-                    tables.forEach(t => t.classList.remove("selected"));
-                    this.classList.add("selected");
+                    elements.tables.forEach(t => t.classList.remove("selected"));
+                    table.classList.add("selected");
                 });
             });
         }
 
-        // Функция инициализации отправки форм
-        function initFormSubmissions() {
-            const bookingForm = document.getElementById('bookingForm');
-            const bookingHallForm = document.getElementById('bookingHallForm');
-            
-            if (bookingForm) {
-                bookingForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    await handleFormSubmit(this, 'Столик успешно забронирован!');
-                });
+        function initForms() {
+            if (elements.bookingForm) {
+                elements.bookingForm.addEventListener('submit', handleSubmit);
             }
-
-            if (bookingHallForm) {
-                bookingHallForm.addEventListener('submit', async function(e) {
-                    e.preventDefault();
-                    await handleFormSubmit(this, 'Зал успешно забронирован!');
-                });
+            if (elements.hallForm) {
+                elements.hallForm.addEventListener('submit', handleSubmit);
             }
         }
 
-        // Функция инициализации проверки доступности
-        function initAvailabilityChecks() {
-            dateInput.addEventListener('change', function() {
-                updateTableAvailability();
-                checkHallAvailability(this.value);
-            });
-
-            timeInput.addEventListener('change', updateTableAvailability);
+        async function handleSubmit(e) {
+            e.preventDefault();
+            const form = e.target;
+            const submitBtn = form.querySelector('button[type="submit"]');
             
-            if (dateInput.value) {
-                updateTableAvailability();
-                checkHallAvailability(dateInput.value);
-            }
-        }
-
-        // Общая функция обработки отправки формы
-        async function handleFormSubmit(form, successMessage) {
             try {
-                const submitBtn = form.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = true;
-
-                const formData = new FormData(form);
+                submitBtn.disabled = true;
                 const response = await fetch(form.action, {
                     method: 'POST',
-                    body: formData
+                    body: new FormData(form)
                 });
-
-                const text = await response.text();
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    console.error("Invalid JSON response:", text);
-                    throw new Error("Ошибка обработки ответа сервера");
-                }
-
-                if (!response.ok || !data.success) {
-                    throw new Error(data.message || 'Ошибка сервера');
-                }
-
-                showSuccess(data.message || successMessage, form);
-            } catch (error) {
-                showError(error);
-            } finally {
-                const submitBtn = form.querySelector('button[type="submit"]');
-                if (submitBtn) submitBtn.disabled = false;
-            }
-        }
-
-        // Остальные функции остаются без изменений...
-        async function updateTableAvailability() {
-            try {
-                if (!dateInput.value || !timeInput.value) return;
                 
-                const response = await fetch(`../components/availability.php?date=${dateInput.value}&time=${timeInput.value}`);
+                const result = await response.json();
                 
-                if (!response.ok) {
-                    throw new Error('Ошибка при проверке доступности');
-                }
-
-                const data = await response.json();
-                updateTableStatuses(data.bookedTables || []);
-                updateHallStatus(data.isHallBooked || false, dateInput.value);
-                
-            } catch (error) {
-                console.error('Ошибка при обновлении доступности:', error);
-            }
-        }
-
-            // Добавьте в функцию initFormSubmissions()
-            if (bookingHallForm) {
-                bookingHallForm.addEventListener('submit', async function(e) {
-                    // Простая валидация перед отправкой
-                    if (!this.eventType.value) {
-                        e.preventDefault();
-                        alert('Пожалуйста, выберите тип мероприятия');
-                        return;
+                if (result.success) {
+                    alert(result.message);
+                    bootstrap.Modal.getInstance(form.closest('.modal'))?.hide();
+                    form.reset();
+                    if (form.id === 'bookingForm') {
+                        elements.tables.forEach(t => t.classList.remove("selected"));
                     }
-                    
-                    e.preventDefault();
-                    await handleFormSubmit(this, 'Зал успешно забронирован!');
-                });
-            }
-
-        async function checkHallAvailability(date) {
-            try {
-                if (!date) return;
-                
-                const response = await fetch(`../components/availability.php?date=${date}`);
-                
-                if (!response.ok) {
-                    throw new Error('Ошибка при проверке зала');
-                }
-
-                const data = await response.json();
-                if (data.isHallBooked) {
-                    alert("На выбранную дату зал уже забронирован. Бронирование столиков невозможно.");
+                } else {
+                    alert(result.message);
                 }
             } catch (error) {
-                console.error('Ошибка при проверке зала:', error);
+                console.error('Error:', error);
+                alert('Ошибка при отправке формы');
+            } finally {
+                submitBtn.disabled = false;
             }
         }
 
-        function updateTableStatuses(bookedTables) {
-            tables.forEach(table => {
-                const tableNumber = table.dataset.table;
-                if (bookedTables.includes(parseInt(tableNumber))) {
-                    table.classList.add('booked');
-                    table.title = "Этот столик занят или временной интервал менее 2 часов";
-                } else {
-                    table.classList.remove('booked');
-                    table.title = "";
-                }
-            });
+        function initAvailabilityChecks() {
+            elements.dateInput.addEventListener('change', updateAvailability);
+            elements.timeInput.addEventListener('change', updateAvailability);
+            if (elements.dateInput.value) updateAvailability();
         }
 
-        function updateHallStatus(isBooked, date) {
-            const hallTitle = document.querySelector('#bookingHallModal .modal-title');
-            if (!hallTitle) return;
-
-            hallTitle.innerHTML = isBooked 
-                ? 'Бронирование зала <span class="text-danger">(Зал занят на эту дату)</span>'
-                : 'Бронирование зала';
-
-            const formElements = document.querySelectorAll('#bookingForm input, #bookingForm select, #bookingForm button');
-            formElements.forEach(el => {
-                if (el.id === 'date' && el.value === date) {
-                    el.disabled = isBooked;
-                }
-            });
-        }
-
-        function showSuccess(message, form) {
-            alert(message);
-            const modal = bootstrap.Modal.getInstance(form.closest('.modal'));
-            if (modal) modal.hide();
-            form.reset();
+        async function updateAvailability() {
+            if (!elements.dateInput.value) return;
             
-            if (form.id === 'bookingForm') {
-                tables.forEach(t => t.classList.remove("selected"));
+            try {
+                // Проверка зала
+                const hallResponse = await fetch(`?date=${elements.dateInput.value}`);
+                const hallData = await hallResponse.json();
+                updateHallStatus(hallData.isHallBooked);
+                
+                // Проверка столиков
+                if (elements.timeInput.value) {
+                    const tablesResponse = await fetch(`?date=${elements.dateInput.value}&time=${elements.timeInput.value}`);
+                    const tablesData = await tablesResponse.json();
+                    updateTablesStatus(tablesData.bookedTables || []);
+                }
+            } catch (error) {
+                console.error('Ошибка проверки:', error);
             }
         }
 
-        function showError(error) {
-            console.error('Error:', error);
-            alert(error.message || 'Произошла ошибка при отправке формы');
+        function updateTablesStatus(bookedTables) {
+            elements.tables.forEach(table => {
+                const isBooked = bookedTables.includes(parseInt(table.dataset.table));
+                table.classList.toggle('booked', isBooked);
+                table.title = isBooked ? "Столик занят" : "";
+            });
+        }
+
+        function updateHallStatus(isBooked) {
+            const hallTitle = document.querySelector('#bookingHallModal .modal-title');
+            if (hallTitle) {
+                hallTitle.innerHTML = isBooked 
+                    ? 'Бронирование зала <span class="text-danger">(Зал занят)</span>'
+                    : 'Бронирование зала';
+            }
         }
     });
+
+    function updateTablesStatus(bookedTables, isHallBooked) {
+    elements.tables.forEach(table => {
+        const tableNumber = table.dataset.table;
+        const isBooked = bookedTables.includes(parseInt(tableNumber)) || isHallBooked;
+        table.classList.toggle('booked', isBooked);
+        table.title = isBooked ? 
+            (isHallBooked ? "Зал забронирован на эту дату" : "Столик занят") : "";
+    });
+}
+
+function updateHallStatus(isHallBooked, hasTableBookings) {
+    const hallTitle = document.querySelector('#bookingHallModal .modal-title');
+    if (hallTitle) {
+        hallTitle.innerHTML = isHallBooked ? 
+            'Бронирование зала <span class="text-danger">(Зал занят)</span>' :
+            hasTableBookings ? 
+            'Бронирование зала <span class="text-danger">(Есть брони столиков)</span>' :
+            'Бронирование зала';
+    }
+}
 </script>
 </body>
 </html>

@@ -91,7 +91,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_order'])) {
         $orderId = $pdo->lastInsertId();
         
         // Переносим товары в заказ и очищаем корзину (как в предыдущем коде)
-        // ...
         
         $pdo->commit();
         
@@ -199,7 +198,7 @@ $reservations = $stmt->fetchAll();
         <h1>Профиль</h1>
         
         <!-- Информация о пользователе -->
-        <div class="profile-card card">
+        <div class="profile-card card-t">
             <div class="user-card">
                 <div class="user-card-img">
                     <img src="<?= htmlspecialchars($avatar_path) ?>" alt="Аватар" class="avatar-image">
@@ -230,12 +229,12 @@ $reservations = $stmt->fetchAll();
 
         <!-- Корзина -->
         <div class="cart-section mt-5" id="cart">
-            <h2>Ваша корзина</h2>
+            <h3>Ваша корзина</h3>
             
             <?php if (isset($cartError)): ?>
                 <div class="alert alert-danger"><?= htmlspecialchars($cartError) ?></div>
             <?php elseif (empty($cartItems)): ?>
-                <p>Ваша корзина пуста</p>
+                <div class="alert lert-danger">Ваша корзина пуста</div>
             <?php else: ?>
                 <div class="table-responsive">
                     <table class="table">
@@ -356,13 +355,13 @@ $reservations = $stmt->fetchAll();
 </div>
         <!-- История заказов -->
         <div class="orders-section mt-5">
-            <h2>Ваши заказы</h2>
             
             <?php if (isset($ordersError)): ?>
                 <div class="alert alert-danger"><?= htmlspecialchars($ordersError) ?></div>
-            <?php elseif (empty($userOrders)): ?>
-                <p>У вас пока нет заказов</p>
-            <?php else: ?>
+                <?php elseif (empty($userOrders)): ?>
+                    <p></p>
+                    <?php else: ?>
+                        <h3>Ваши заказы</h3>
                 <div class="row">
                     <?php foreach ($userOrders as $order): ?>
                         <div class="col-md-6 mb-3">
@@ -414,11 +413,11 @@ $reservations = $stmt->fetchAll();
             <?php endif; ?>
         </div>
 
-            <div class="col-md-8">
-                <h4>Мои бронирования</h4>
+            <div class="cart-section mt-5">
+                <h3>Ваши бронирования</h3>
                 
                 <?php if (empty($reservations)): ?>
-                    <div class="alert alert-info">У вас нет активных бронирований</div>
+                    <div class="alert lert-danger">У вас нет активных бронирований</div>
                 <?php else: ?>
                     <?php foreach ($reservations as $reservation): ?>
                         <div class="card reservation-card status-<?= $reservation['status'] ?>">
@@ -453,7 +452,7 @@ $reservations = $stmt->fetchAll();
             </div>
 
         <!-- Блок отзывов -->
-        <div class="for-otziv card mt-4">
+        <div class="for-otziv card-t mt-4">
             <div class="card-body">
                 
                 <div class="review-invitation mb-4">
@@ -502,257 +501,334 @@ $reservations = $stmt->fetchAll();
 
 <?php include 'components/footer.php'; ?>
 
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Подключите Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 
+    <script src="js/script.js"></script>
+    <script src="js/script-modal.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Обработчик удаления из корзины
-    document.getElementById('cart').addEventListener('click', async function(e) {
-        if (e.target.classList.contains('remove-from-cart')) {
-            e.preventDefault();
-            const cartId = e.target.dataset.cartId;
-            
-            try {
-                const response = await fetch(`components/remove_from_cart.php?id=${cartId}`);
-                const result = await response.json();
-                
-                if (result.status === 'success') {
-                    // Плавное исчезновение строки
-                    const row = e.target.closest('tr');
-                    row.style.transition = 'opacity 0.3s';
-                    row.style.opacity = '0';
+    document.addEventListener('DOMContentLoaded', function() {
+        // Общие элементы
+        const cartTable = document.getElementById('cart');
+        const reviewForm = document.getElementById('reviewForm');
+        const orderForm = document.getElementById('orderForm');
+        
+        // Обработчик удаления из корзины
+        if (cartTable) {
+            cartTable.addEventListener('click', async function(e) {
+                if (e.target.classList.contains('remove-from-cart')) {
+                    e.preventDefault();
+                    const cartId = e.target.dataset.cartId;
                     
-                    // Обновление через 300мс
-                    setTimeout(() => {
-                        location.reload();
-                    }, 300);
-                } else {
-                    alert(`Ошибка: ${result.message}`);
+                    if (!confirm('Вы уверены, что хотите удалить товар из корзины?')) {
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`components/remove_from_cart.php?id=${cartId}`);
+                        const result = await response.json();
+                        
+                        if (result.status === 'success') {
+                            const row = e.target.closest('tr');
+                            row.style.transition = 'opacity 0.3s ease';
+                            row.style.opacity = '0';
+                            
+                            setTimeout(() => {
+                                row.remove();
+                                updateTotalSum();
+                                showToast('Товар удален из корзины', 'success');
+                            }, 300);
+                        } else {
+                            showToast(`Ошибка: ${result.message}`, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showToast('Произошла ошибка при удалении товара', 'error');
+                    }
+                }
+            });
+
+            // Обработчик изменения количества
+            cartTable.addEventListener('change', debounce(async function(e) {
+                if (e.target.classList.contains('quantity-input')) {
+                    const input = e.target;
+                    const cartId = input.dataset.cartId;
+                    const newQuantity = parseInt(input.value);
+                    const oldValue = parseInt(input.dataset.oldValue);
+
+                    // Валидация
+                    if (isNaN(newQuantity) || newQuantity < 1 || newQuantity > 100) {
+                        showToast('Количество должно быть от 1 до 100', 'warning');
+                        input.value = oldValue;
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('components/update_cart.php', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                cart_id: cartId,
+                                quantity: newQuantity
+                            })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (result.status === 'success') {
+                            input.dataset.oldValue = newQuantity;
+                            updateRowTotal(input);
+                            updateTotalSum();
+                            showToast('Количество обновлено', 'success');
+                        } else {
+                            showToast(`Ошибка: ${result.message}`, 'error');
+                            input.value = oldValue;
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showToast('Произошла ошибка при обновлении количества', 'error');
+                        input.value = oldValue;
+                    }
+                }
+            }, 500));
+        }
+
+        // Функция для обновления суммы в строке
+        function updateRowTotal(input) {
+            const row = input.closest('tr');
+            const price = parseFloat(row.querySelector('.item-price').textContent);
+            const sumCell = row.querySelector('.item-total');
+            sumCell.textContent = (price * input.value).toFixed(2) + ' руб.';
+        }
+
+        // Функция для пересчета общей суммы
+        function updateTotalSum() {
+            let total = 0;
+            document.querySelectorAll('.item-total').forEach(cell => {
+                total += parseFloat(cell.textContent);
+            });
+            
+            const totalElement = document.querySelector('.cart-total');
+            if (totalElement) {
+                totalElement.textContent = `Итого: ${total.toFixed(2)} руб.`;
+            }
+        }
+
+        // Обработчики для формы отзывов
+        if (reviewForm) {
+            const openBtn = document.getElementById('openReviewForm');
+            const formContainer = document.getElementById('reviewFormContainer');
+            const cancelBtn = document.getElementById('cancelReview');
+            
+            if (openBtn && formContainer && cancelBtn) {
+                // Открытие формы
+                openBtn.addEventListener('click', function() {
+                    formContainer.classList.remove('d-none');
+                    openBtn.classList.add('d-none');
+                });
+                
+                // Закрытие формы
+                cancelBtn.addEventListener('click', function() {
+                    formContainer.classList.add('d-none');
+                    openBtn.classList.remove('d-none');
+                    reviewForm.reset();
+                });
+                
+                // Отправка формы
+                reviewForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Отправка...';
+                    
+                    try {
+                        const formData = new FormData(this);
+                        formData.append('action', 'submit_review');
+                        
+                        const response = await fetch('modal/handle_review.php', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            showToast('Отзыв успешно отправлен!', 'success');
+                            formContainer.classList.add('d-none');
+                            openBtn.classList.remove('d-none');
+                            this.reset();
+                            loadUserReviews();
+                        } else {
+                            showToast('Ошибка: ' + data.message, 'error');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        showToast('Произошла ошибка при отправке отзыва', 'error');
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Отправить отзыв';
+                    }
+                });
+            }
+        }
+
+        // Функция для загрузки отзывов пользователя
+        async function loadUserReviews() {
+            const reviewsContainer = document.getElementById('userReviews');
+            if (!reviewsContainer) return;
+
+            try {
+                const response = await fetch(`modal/handle_review.php?action=get_reviews&user_id=${reviewsContainer.dataset.userId}`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    reviewsContainer.innerHTML = '';
+                    
+                    if (data.reviews.length > 0) {
+                        const table = document.createElement('table');
+                        table.className = 'table table-striped';
+                        
+                        table.innerHTML = `
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>Отзыв</th>
+                                    <th>Оценка</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.reviews.map(review => `
+                                    <tr>
+                                        <td>${new Date(review.created_at).toLocaleString()}</td>
+                                        <td>${escapeHtml(review.review_text)}</td>
+                                        <td>${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-danger delete-review" data-id="${review.id}">
+                                                <i class="bi bi-trash"></i> Удалить
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        `;
+                        
+                        reviewsContainer.appendChild(table);
+                        
+                        // Обработчики для кнопок удаления
+                        document.querySelectorAll('.delete-review').forEach(btn => {
+                            btn.addEventListener('click', function() {
+                                if (confirm('Вы уверены, что хотите удалить этот отзыв?')) {
+                                    deleteReview(this.dataset.id);
+                                }
+                            });
+                        });
+                    } else {
+                        reviewsContainer.innerHTML = '<div class="alert alert-info">У вас пока нет отзывов.</div>';
+                    }
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Произошла ошибка при удалении товара');
+                reviewsContainer.innerHTML = '<div class="alert alert-danger">Не удалось загрузить отзывы</div>';
             }
         }
-    });
-
-    // Обработчик изменения количества
-    document.getElementById('cart').addEventListener('change', async function(e) {
-        if (e.target.classList.contains('quantity-input')) {
-            const input = e.target;
-            const cartId = input.dataset.cartId;
-            const newQuantity = parseInt(input.value);
-            const oldValue = parseInt(input.dataset.oldValue);
-
-            // Валидация
-            if (isNaN(newQuantity) || newQuantity < 1 || newQuantity > 100) {
-                alert('Количество должно быть от 1 до 100');
-                input.value = oldValue;
-                return;
-            }
-
+        
+        // Функция для удаления отзыва
+        async function deleteReview(reviewId) {
             try {
-                const response = await fetch('components/update_cart.php', {
+                const response = await fetch('modal/handle_review.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        cart_id: cartId,
-                        quantity: newQuantity
+                        action: 'delete_review',
+                        review_id: reviewId
                     })
                 });
                 
-                const result = await response.json();
+                const data = await response.json();
                 
-                if (result.status === 'success') {
-                    // Обновляем старую цену
-                    input.dataset.oldValue = newQuantity;
-                    
-                    // Пересчитываем сумму
-                    const row = input.closest('tr');
-                    const price = parseFloat(row.querySelector('td:nth-child(3)').textContent);
-                    const sumCell = row.querySelector('td:nth-child(5)');
-                    sumCell.textContent = (price * newQuantity).toFixed(2) + ' руб.';
-                    
-                    // Пересчитываем общую сумму
-                    updateTotalSum();
+                if (data.success) {
+                    showToast('Отзыв удален', 'success');
+                    loadUserReviews();
                 } else {
-                    alert(`Ошибка: ${result.message}`);
-                    input.value = oldValue;
+                    showToast('Ошибка: ' + data.message, 'error');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Произошла ошибка при обновлении количества');
-                input.value = oldValue;
+                showToast('Произошла ошибка при удалении отзыва', 'error');
             }
         }
-    });
 
-    // Функция для пересчета общей суммы
-    function updateTotalSum() {
-        let total = 0;
-        document.querySelectorAll('#cart tbody tr').forEach(row => {
-            const sumText = row.querySelector('td:nth-child(5)').textContent;
-            total += parseFloat(sumText);
-        });
-        
-        document.querySelector('#cart .text-end h4').textContent = `Итого: ${total.toFixed(2)} руб.`;
-    }
+        // Обработка формы заказа
+        if (orderForm) {
+            // Показ/скрытие полей адреса доставки
+            document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    document.getElementById('deliveryFields').style.display = 
+                        this.value === 'delivery' ? 'block' : 'none';
+                });
+            });
 
-    // Обработчики для формы отзывов
-    const openBtn = document.getElementById('openReviewForm');
-    const formContainer = document.getElementById('reviewFormContainer');
-    const cancelBtn = document.getElementById('cancelReview');
-    
-    // Открытие формы
-    openBtn.addEventListener('click', function() {
-        formContainer.style.display = 'block';
-        openBtn.style.display = 'none';
-    });
-    
-    // Закрытие формы
-    cancelBtn.addEventListener('click', function() {
-        formContainer.style.display = 'none';
-        openBtn.style.display = 'block';
-        document.getElementById('reviewForm').reset();
-    });
-    
-    // Отправка формы через AJAX
-    document.getElementById('reviewForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        formData.append('action', 'submit_review');
-        
-        fetch('modal/handle_review.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Отзыв успешно отправлен!');
-                formContainer.style.display = 'none';
-                openBtn.style.display = 'block';
-                this.reset();
-                loadUserReviews(); // Обновляем список отзывов
-            } else {
-                alert('Ошибка: ' + data.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Произошла ошибка при отправке отзыва');
-        });
-    });
-    
-    // Функция для загрузки отзывов пользователя
-    function loadUserReviews() {
-        fetch('modal/handle_review.php?action=get_reviews&user_id=<?= $_SESSION['user_id'] ?>')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                const reviewsContainer = document.getElementById('userReviews');
-                reviewsContainer.innerHTML = '';
+            // Валидация перед отправкой
+            orderForm.addEventListener('submit', function(e) {
+                const deliveryType = document.querySelector('input[name="delivery_type"]:checked')?.value;
+                const deliveryTime = document.getElementById('delivery_time').value;
                 
-                if (data.reviews.length > 0) {
-                    const table = document.createElement('table');
-                    table.className = 'table table-striped';
-                    
-                    const thead = document.createElement('thead');
-                    thead.innerHTML = `
-                        <tr>
-                            <th>Дата</th>
-                            <th>Отзыв</th>
-                            <th>Оценка</th>
-                            <th>Действия</th>
-                        </tr>
-                    `;
-                    table.appendChild(thead);
-                    
-                    const tbody = document.createElement('tbody');
-                    data.reviews.forEach(review => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${new Date(review.created_at).toLocaleString()}</td>
-                            <td>${review.review_text}</td>
-                            <td>${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}</td>
-                            <td><button class="btn btn-sm btn-danger delete-review" data-id="${review.id}">Удалить</button></td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                    
-                    table.appendChild(tbody);
-                    reviewsContainer.appendChild(table);
-                    
-                    // Добавляем обработчики для кнопок удаления
-                    document.querySelectorAll('.delete-review').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            if (confirm('Вы уверены, что хотите удалить этот отзыв?')) {
-                                deleteReview(this.getAttribute('data-id'));
-                            }
-                        });
-                    });
-                } else {
-                    reviewsContainer.innerHTML = '<p>У вас пока нет отзывов.</p>';
+                if (!deliveryTime) {
+                    e.preventDefault();
+                    showToast('Пожалуйста, выберите время получения заказа', 'warning');
+                    return;
                 }
-            }
-        });
-    }
-    
-    // Функция для удаления отзыва
-    function deleteReview(reviewId) {
-        const formData = new FormData();
-        formData.append('action', 'delete_review');
-        formData.append('review_id', reviewId);
-        
-        fetch('modal/handle_review.php', {
-            method: 'POST',
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Отзыв удален');
-                loadUserReviews(); // Обновляем список отзывов
-            } else {
-                alert('Ошибка: ' + data.message);
-            }
-        });
-    }
-    
-    // Загружаем отзывы при загрузке страницы
-    loadUserReviews();
-});
+                
+                if (deliveryType === 'delivery' && !document.getElementById('delivery_address').value.trim()) {
+                    e.preventDefault();
+                    showToast('Пожалуйста, укажите адрес доставки', 'warning');
+                    return;
+                }
+            });
+        }
 
-// Показ/скрытие полей адреса доставки
-document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
-    radio.addEventListener('change', function() {
-        document.getElementById('deliveryFields').style.display = 
-            this.value === 'delivery' ? 'block' : 'none';
-    });
-});
+        // Вспомогательные функции
+        function showToast(message, type = 'info') {
+            // Реализация toast-уведомлений (зависит от вашей библиотеки)
+            console.log(`${type.toUpperCase()}: ${message}`);
+            // Пример для Bootstrap:
+            const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+            document.getElementById('toastMessage').textContent = message;
+            document.getElementById('liveToast').className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.show();
+        }
 
-// Обработка отправки формы заказа
-document.getElementById('orderForm').addEventListener('submit', function(e) {
-    const deliveryType = document.querySelector('input[name="delivery_type"]:checked').value;
-    const deliveryTime = document.getElementById('delivery_time').value;
-    
-    if (!deliveryTime) {
-        e.preventDefault();
-        alert('Пожалуйста, выберите время получения заказа');
-        return;
-    }
-    
-    if (deliveryType === 'delivery' && !document.getElementById('delivery_address').value.trim()) {
-        e.preventDefault();
-        alert('Пожалуйста, укажите адрес доставки');
-        return;
-    }
-});
+        function debounce(func, wait) {
+            let timeout;
+            return function(...args) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => func.apply(this, args), wait);
+            };
+        }
+
+        function escapeHtml(unsafe) {
+            return unsafe
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // Инициализация
+        if (document.getElementById('userReviews')) {
+            loadUserReviews();
+        }
+    });    
 </script>
 
 <?php
